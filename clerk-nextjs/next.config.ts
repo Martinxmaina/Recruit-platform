@@ -15,12 +15,16 @@ const nextConfig: NextConfig = {
 	},
 	webpack: (config, { isServer }) => {
 		// Ensure @clerk/clerk-react and subpath exports are properly resolved
+		const clerkReactPath = require.resolve("@clerk/clerk-react");
+		// Extract package directory (remove /dist/index.js from path)
+		const clerkReactDir = clerkReactPath.substring(0, clerkReactPath.lastIndexOf("/dist"));
+		
 		config.resolve.alias = {
 			...config.resolve.alias,
-			"@clerk/clerk-react": require.resolve("@clerk/clerk-react"),
-			"@clerk/clerk-react/internal": require.resolve("@clerk/clerk-react/dist/internal.js"),
-			"@clerk/clerk-react/errors": require.resolve("@clerk/clerk-react/dist/errors.js"),
-			"@clerk/clerk-react/experimental": require.resolve("@clerk/clerk-react/dist/experimental.js"),
+			"@clerk/clerk-react": clerkReactPath,
+			"@clerk/clerk-react/internal": `${clerkReactDir}/dist/internal.js`,
+			"@clerk/clerk-react/errors": `${clerkReactDir}/dist/errors.js`,
+			"@clerk/clerk-react/experimental": `${clerkReactDir}/dist/experimental.js`,
 		};
 		
 		// Configure webpack to respect package exports
