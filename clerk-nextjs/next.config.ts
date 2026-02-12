@@ -13,15 +13,21 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	webpack: (config) => {
+	webpack: (config, { isServer }) => {
 		// Ensure @clerk/clerk-react is properly resolved
-		// The internal module should resolve automatically via package exports
 		config.resolve.alias = {
 			...config.resolve.alias,
 			"@clerk/clerk-react": require.resolve("@clerk/clerk-react"),
 		};
-		// Ensure proper module resolution for Clerk packages
-		config.resolve.modules = [...(config.resolve.modules || []), "node_modules"];
+		
+		// Configure webpack to respect package exports
+		config.resolve.conditionNames = ['require', 'node', 'import', 'default'];
+		
+		// Ensure webpack resolves package exports correctly
+		if (!config.resolve.extensionAlias) {
+			config.resolve.extensionAlias = {};
+		}
+		
 		return config;
 	},
 	turbopack: {},
