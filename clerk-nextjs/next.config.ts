@@ -13,13 +13,12 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	webpack: (config, { isServer }) => {
+	webpack: (config) => {
 		// Ensure @clerk/clerk-react is properly resolved
-		if (!isServer) {
-			config.resolve.fallback = {
-				...config.resolve.fallback,
-			};
-		}
+		config.resolve.alias = {
+			...config.resolve.alias,
+			"@clerk/clerk-react": require.resolve("@clerk/clerk-react"),
+		};
 		return config;
 	},
 };
