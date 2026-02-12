@@ -14,10 +14,11 @@ const nextConfig: NextConfig = {
 		],
 	},
 	webpack: (config) => {
-		// Ensure @clerk/clerk-react is properly resolved
+		// Ensure @clerk/clerk-react and its internal modules are properly resolved
 		config.resolve.alias = {
 			...config.resolve.alias,
 			"@clerk/clerk-react": require.resolve("@clerk/clerk-react"),
+			"@clerk/clerk-react/internal": require.resolve("@clerk/clerk-react/dist/internal"),
 		};
 		return config;
 	},
