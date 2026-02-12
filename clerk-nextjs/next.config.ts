@@ -14,19 +14,17 @@ const nextConfig: NextConfig = {
 		],
 	},
 	webpack: (config, { isServer }) => {
-		// Ensure @clerk/clerk-react is properly resolved
+		// Ensure @clerk/clerk-react and subpath exports are properly resolved
 		config.resolve.alias = {
 			...config.resolve.alias,
 			"@clerk/clerk-react": require.resolve("@clerk/clerk-react"),
+			"@clerk/clerk-react/internal": require.resolve("@clerk/clerk-react/dist/internal.js"),
+			"@clerk/clerk-react/errors": require.resolve("@clerk/clerk-react/dist/errors.js"),
+			"@clerk/clerk-react/experimental": require.resolve("@clerk/clerk-react/dist/experimental.js"),
 		};
 		
 		// Configure webpack to respect package exports
 		config.resolve.conditionNames = ['require', 'node', 'import', 'default'];
-		
-		// Ensure webpack resolves package exports correctly
-		if (!config.resolve.extensionAlias) {
-			config.resolve.extensionAlias = {};
-		}
 		
 		// Handle Node.js built-in modules (node:fs, node:crypto, etc.)
 		if (!isServer) {
@@ -45,6 +43,27 @@ const nextConfig: NextConfig = {
 				assert: false,
 				os: false,
 				path: false,
+				util: false,
+				buffer: false,
+				process: false,
+			};
+			
+			// Handle node: scheme prefix by normalizing imports
+			config.resolve.alias = {
+				...config.resolve.alias,
+				"node:fs": false,
+				"node:path": false,
+				"node:crypto": false,
+				"node:stream": false,
+				"node:util": false,
+				"node:buffer": false,
+				"node:os": false,
+				"node:net": false,
+				"node:tls": false,
+				"node:http": false,
+				"node:https": false,
+				"node:zlib": false,
+				"node:url": false,
 			};
 		}
 		
