@@ -13,15 +13,16 @@ const nextConfig: NextConfig = {
 			},
 		],
 	},
-	webpack: (config, { isServer }) => {
+	webpack: (config, { isServer, webpack, nextRuntime }) => {
 		// Ensure @clerk/clerk-react and subpath exports are properly resolved
 		const clerkReactPath = require.resolve("@clerk/clerk-react");
 		// Extract package directory (remove /dist/index.js from path)
 		const clerkReactDir = clerkReactPath.substring(0, clerkReactPath.lastIndexOf("/dist"));
 		
+		// Combine all aliases in one assignment, preserving existing ones
+		// Use .js files universally - webpack handles ESM/CommonJS distinction internally
 		config.resolve.alias = {
 			...config.resolve.alias,
-			"@clerk/clerk-react": clerkReactPath,
 			"@clerk/clerk-react/internal": `${clerkReactDir}/dist/internal.js`,
 			"@clerk/clerk-react/errors": `${clerkReactDir}/dist/errors.js`,
 			"@clerk/clerk-react/experimental": `${clerkReactDir}/dist/experimental.js`,
@@ -30,9 +31,24 @@ const nextConfig: NextConfig = {
 		// Configure webpack to respect package exports
 		config.resolve.conditionNames = ['require', 'node', 'import', 'default'];
 		
-		// Handle Node.js built-in modules (node:fs, node:crypto, etc.)
-		if (!isServer) {
-			// For client-side builds, externalize Node.js built-ins
+		// Handle node: scheme prefix using NormalModuleReplacementPlugin
+		// This runs before resolution, so it strips the prefix early
+		// Apply to both server and client builds since node: imports can appear in both
+		config.plugins.push(
+			new webpack.NormalModuleReplacementPlugin(
+				/^node:/,
+				(resource) => {
+					resource.request = resource.request.replace(/^node:/, '');
+				}
+			)
+		);
+		
+		// Handle Node.js built-in modules
+		// For Edge runtime (middleware) and client builds, externalize Node.js built-ins
+		const isEdgeRuntime = nextRuntime === 'edge';
+		if (!isServer || isEdgeRuntime) {
+			// For client-side and Edge runtime builds, externalize Node.js built-ins
+			// These will work after the node: prefix is stripped by the plugin above
 			config.resolve.fallback = {
 				...config.resolve.fallback,
 				fs: false,
@@ -52,23 +68,8 @@ const nextConfig: NextConfig = {
 				process: false,
 			};
 			
-			// Handle node: scheme prefix by normalizing imports
-			config.resolve.alias = {
-				...config.resolve.alias,
-				"node:fs": false,
-				"node:path": false,
-				"node:crypto": false,
-				"node:stream": false,
-				"node:util": false,
-				"node:buffer": false,
-				"node:os": false,
-				"node:net": false,
-				"node:tls": false,
-				"node:http": false,
-				"node:https": false,
-				"node:zlib": false,
-				"node:url": false,
-			};
+			// Edge runtime externals are handled by fallbacks above
+			// The fallbacks prevent Node.js built-ins from being bundled
 		}
 		
 		return config;

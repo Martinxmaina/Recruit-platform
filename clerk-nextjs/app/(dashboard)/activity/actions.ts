@@ -77,7 +77,7 @@ export async function getJobActivity(jobId: string) {
 
 	if (!applications || applications.length === 0) return [];
 
-	const applicationIds = applications.map((a) => a.id);
+	const applicationIds = applications.map((a: { id: string; candidate_id: string }) => a.id);
 
 	const { data, error } = await supabase
 		.from("activity_logs")

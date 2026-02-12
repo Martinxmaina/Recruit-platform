@@ -20,37 +20,6 @@ export function JobsList({ initialJobs, clients }: JobsListProps) {
 	const searchParams = useSearchParams();
 	const [viewMode, setViewMode] = useState<"card" | "table">("card");
 
-	// Get organization_id from initial jobs (all jobs belong to the same org)
-	const organizationId = initialJobs[0]?.organization_id;
-
-	// Set up Supabase Realtime subscription to listen for jobs table changes
-	useEffect(() => {
-		if (!organizationId) return;
-
-		const supabase = createClient();
-
-		const channel = supabase
-			.channel("jobs-changes")
-			.on(
-				"postgres_changes",
-				{
-					event: "*", // INSERT, UPDATE, DELETE
-					schema: "public",
-					table: "jobs",
-					filter: `organization_id=eq.${organizationId}`,
-				},
-				() => {
-					// Refetch data from server when jobs table changes
-					router.refresh();
-				}
-			)
-			.subscribe();
-
-		return () => {
-			supabase.removeChannel(channel);
-		};
-	}, [organizationId, router]);
-
 	const handleFiltersChange = (filters: {
 		search?: string;
 		status?: string;
