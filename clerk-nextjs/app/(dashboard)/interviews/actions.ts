@@ -125,6 +125,10 @@ export async function getCandidateInterviews(candidateId: string) {
 	return getInterviews({ candidate_id: candidateId });
 }
 
+export async function getJobInterviews(jobId: string) {
+	return getInterviews({ job_id: jobId });
+}
+
 export async function getInterview(id: string) {
 	const { userId, orgId } = await auth();
 
@@ -298,6 +302,13 @@ export async function updateInterview(
 	revalidatePath("/jobs");
 	revalidatePath("/candidates");
 	return { data: interview };
+}
+
+/**
+ * Convenience function to update only the interview status
+ */
+export async function updateInterviewStatus(id: string, status: string) {
+	return updateInterview(id, { status });
 }
 
 export async function deleteInterview(id: string) {
