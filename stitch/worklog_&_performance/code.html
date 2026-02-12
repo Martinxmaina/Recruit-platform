@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Worklog &amp; Activity Performance | RecruitFlow</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#5048e5",
+                "background-light": "#f6f6f8",
+                "background-dark": "#121121",
+              },
+              fontFamily: {
+                "display": ["Inter", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light text-[#0f0e1b] font-display min-h-screen">
+<div class="flex flex-col min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#e8e8f3] bg-white px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<div class="size-8 flex items-center justify-center bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">diversity_3</span>
+</div>
+<h2 class="text-[#0f0e1b] text-xl font-bold leading-tight tracking-[-0.015em]">RecruitFlow</h2>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-[#545095] hover:text-primary text-sm font-semibold transition-colors" href="#">Dashboard</a>
+<a class="text-[#545095] hover:text-primary text-sm font-semibold transition-colors" href="#">Candidates</a>
+<a class="text-primary text-sm font-bold border-b-2 border-primary py-4 -mb-4 transition-colors" href="#">Worklog</a>
+<a class="text-[#545095] hover:text-primary text-sm font-semibold transition-colors" href="#">Jobs</a>
+</nav>
+</div>
+<div class="flex items-center gap-6">
+<label class="flex items-center min-w-40 h-10 max-w-64 relative group">
+<div class="absolute left-3 text-[#545095]">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="w-full h-full bg-[#f0f0f5] border-none rounded-lg pl-10 pr-4 text-sm focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-[#545095]/60" placeholder="Search team activity..."/>
+</label>
+<div class="flex items-center gap-3 pl-4 border-l border-[#e8e8f3]">
+<div class="text-right">
+<p class="text-xs font-bold text-[#0f0e1b]">Alex Rivera</p>
+<p class="text-[10px] text-[#545095]">Admin</p>
+</div>
+<div class="size-9 rounded-full bg-primary/20 bg-cover bg-center" data-alt="Profile picture of a male recruiter" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCgr-iTQ09WOhaVQoRAatidrk99c_-hjQOaK5CNpsv1ZLezcpO9NpzBOSEUd_PaR-LNDKw8m0qIqHUfx2aimTA2Tr4SSTOPxQDKy_5X2ctuZIrUXskQFQ0WUDosIPpcRjuATboPHiwDyDwtDf104WcleohXJNNy0upfWzmPVuggqBFNte4nkCjnBsKV1Ef0mJhr623hvKqWBVrySkoo-OeP9507acxlBWng2Eq04Hj-uNRmyg8J3HV7U_HKZsK6Adibbz2xlRzaCoE')"></div>
+</div>
+</div>
+</header>
+<main class="flex-1 max-w-[1440px] mx-auto w-full p-8 flex gap-8">
+<!-- Left Column: Performance Insights -->
+<div class="flex-1 flex flex-col gap-6">
+<div class="flex items-end justify-between">
+<div>
+<h1 class="text-3xl font-black tracking-tight text-[#0f0e1b]">Performance Velocity</h1>
+<p class="text-[#545095] mt-1">Real-time team productivity and recruitment metrics</p>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e8f3] rounded-lg text-sm font-semibold text-[#545095] hover:bg-[#f9f8fb] transition-all">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        Last 30 Days
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 hover:brightness-110 transition-all">
+<span class="material-symbols-outlined text-[18px]">download</span>
+                        Export PDF
+                    </button>
+</div>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-white p-6 rounded-xl border border-[#e8e8f3] shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-green-50 rounded-lg">
+<span class="material-symbols-outlined text-green-600">person_add</span>
+</div>
+<span class="text-green-600 text-xs font-bold bg-green-50 px-2 py-1 rounded">+12%</span>
+</div>
+<p class="text-[#545095] text-sm font-medium">Total Candidates</p>
+<h3 class="text-2xl font-black text-[#0f0e1b] mt-1">1,240</h3>
+</div>
+<div class="bg-white p-6 rounded-xl border border-[#e8e8f3] shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">event_available</span>
+</div>
+<span class="text-primary text-xs font-bold bg-primary/10 px-2 py-1 rounded">+5%</span>
+</div>
+<p class="text-[#545095] text-sm font-medium">Interviews This Week</p>
+<h3 class="text-2xl font-black text-[#0f0e1b] mt-1">42</h3>
+</div>
+<div class="bg-white p-6 rounded-xl border border-[#e8e8f3] shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-orange-50 rounded-lg">
+<span class="material-symbols-outlined text-orange-600">send_and_archive</span>
+</div>
+<span class="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">-2%</span>
+</div>
+<p class="text-[#545095] text-sm font-medium">Offers Sent</p>
+<h3 class="text-2xl font-black text-[#0f0e1b] mt-1">8</h3>
+</div>
+</div>
+<!-- Main Performance Chart Simulation -->
+<div class="bg-white p-8 rounded-xl border border-[#e8e8f3] shadow-sm flex-1 flex flex-col min-h-[400px]">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-lg font-bold">Interviews per Week</h3>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-primary"></div>
+<span class="text-xs text-[#545095] font-medium">This Week</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="size-3 rounded-full bg-[#d2d1e6]"></div>
+<span class="text-xs text-[#545095] font-medium">Last Week</span>
+</div>
+</div>
+</div>
+<!-- Mock Chart Visualization -->
+<div class="relative flex-1 flex items-end justify-between gap-4 pt-4">
+<div class="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
+<div class="border-t border-[#f0f0f5] w-full"></div>
+<div class="border-t border-[#f0f0f5] w-full"></div>
+<div class="border-t border-[#f0f0f5] w-full"></div>
+<div class="border-t border-[#f0f0f5] w-full"></div>
+<div class="border-t border-[#f0f0f5] w-full"></div>
+</div>
+<!-- Bars -->
+<div class="relative w-full flex items-end justify-around h-full z-10">
+<div class="group relative flex flex-col items-center gap-2 w-12">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-1/2 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[65%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Mon</span>
+</div>
+<div class="group relative flex flex-col items-center gap-2 w-12">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-2/3 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[80%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Tue</span>
+</div>
+<div class="group relative flex flex-col items-center gap-2 w-12">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-1/3 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[45%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Wed</span>
+</div>
+<div class="group relative flex flex-col items-center gap-2 w-12">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-3/4 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[90%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Thu</span>
+</div>
+<div class="group relative flex flex-col items-center gap-2 w-12">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-1/2 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[75%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Fri</span>
+</div>
+<div class="group relative flex flex-col items-center gap-2 w-12 opacity-50">
+<div class="w-8 bg-[#d2d1e6] rounded-t-lg h-1/6 transition-all group-hover:brightness-95"></div>
+<div class="w-8 bg-primary rounded-t-lg h-[10%] -mt-12 transition-all group-hover:brightness-110"></div>
+<span class="text-xs font-bold text-[#545095]">Sat</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Secondary Charts -->
+<div class="grid grid-cols-2 gap-6">
+<div class="bg-white p-6 rounded-xl border border-[#e8e8f3] shadow-sm">
+<h4 class="font-bold text-sm mb-4">Sourcing Channels</h4>
+<div class="flex items-center gap-6">
+<div class="relative size-32 rounded-full border-[16px] border-[#f0f0f5] flex items-center justify-center">
+<div class="absolute inset-[-16px] rounded-full border-[16px] border-primary border-r-transparent border-b-transparent"></div>
+<p class="text-lg font-black">64%</p>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-2 text-xs font-semibold">
+<span class="size-2 rounded-full bg-primary"></span> LinkedIn (64%)
+                            </div>
+<div class="flex items-center gap-2 text-xs font-semibold">
+<span class="size-2 rounded-full bg-[#8b85f2]"></span> Referral (22%)
+                            </div>
+<div class="flex items-center gap-2 text-xs font-semibold">
+<span class="size-2 rounded-full bg-[#d2d1e6]"></span> Job Boards (14%)
+                            </div>
+</div>
+</div>
+</div>
+<div class="bg-white p-6 rounded-xl border border-[#e8e8f3] shadow-sm">
+<h4 class="font-bold text-sm mb-4">Time to Hire (Days)</h4>
+<div class="flex flex-col gap-4 mt-2">
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-[#545095]">
+<span>Engineering</span>
+<span>18 Days</span>
+</div>
+<div class="h-2 w-full bg-[#f0f0f5] rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[75%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-[#545095]">
+<span>Design</span>
+<span>12 Days</span>
+</div>
+<div class="h-2 w-full bg-[#f0f0f5] rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[50%] rounded-full"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider text-[#545095]">
+<span>Marketing</span>
+<span>24 Days</span>
+</div>
+<div class="h-2 w-full bg-[#f0f0f5] rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[90%] rounded-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Activity Feed Sidebar -->
+<aside class="w-[400px] flex flex-col bg-white rounded-xl border border-[#e8e8f3] shadow-lg overflow-hidden h-[calc(100vh-140px)] sticky top-[88px]">
+<div class="p-6 border-b border-[#e8e8f3] flex items-center justify-between bg-[#f9f8fb]">
+<h2 class="font-bold text-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history</span>
+                    Team Worklog
+                </h2>
+<div class="flex gap-1">
+<button class="p-1 hover:bg-[#e8e8f3] rounded transition-colors"><span class="material-symbols-outlined text-[20px]">filter_alt</span></button>
+<button class="p-1 hover:bg-[#e8e8f3] rounded transition-colors"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 scroll-smooth">
+<!-- Activity Item 1 -->
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#e8e8f3] -ml-[1px]"></div>
+<div class="absolute left-[-15px] top-0 size-8 rounded-full bg-white border-2 border-primary flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px] text-primary">person_search</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-[#0f0e1b] group-hover:text-primary transition-colors">Sarah Meyer</p>
+<span class="text-[10px] font-bold text-[#545095] bg-[#f0f0f5] px-2 py-0.5 rounded">2m ago</span>
+</div>
+<p class="text-sm text-[#545095] mt-1 leading-relaxed">Moved <span class="font-bold text-[#0f0e1b]">Jason Doe</span> to <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-50 text-primary border border-primary/20">Technical Interview</span></p>
+</div>
+</div>
+<!-- Activity Item 2 -->
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#e8e8f3] -ml-[1px]"></div>
+<div class="absolute left-[-15px] top-0 size-8 rounded-full bg-white border-2 border-green-500 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px] text-green-600">group_add</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-[#0f0e1b]">Kevin Lee</p>
+<span class="text-[10px] font-bold text-[#545095] bg-[#f0f0f5] px-2 py-0.5 rounded">1h ago</span>
+</div>
+<p class="text-sm text-[#545095] mt-1 leading-relaxed">Sourced <span class="font-bold text-green-600">5 new candidates</span> from LinkedIn for the Senior React Engineer position.</p>
+<div class="flex gap-2 mt-3">
+<div class="size-6 rounded-full bg-gray-200 border border-white" data-alt="Candidate avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCpqP_42TH5ooKIpY90ylGI_U-oNOUYayA0wiWYdaDk-yvAZOVBTuFP7uexB0RQRWr01oAdo1WsLdaDObhszUvwH6oQ_N164zZztXQYlplx9N95FJp1ffY8fIgQ0JL5t-eCS3PfbI_4yeMkl6fyC2oM6R5j9eiqshneW2h95J1c-ap3FaHS9Vs90pBbnsmrfoRDcny5KjVstCi2SAMM6zOEvXAhEX2fWy9H-DcXQxM_sKwi7wcPOCS-IA4chgzGdGMojULb5rHkybQ')"></div>
+<div class="size-6 rounded-full bg-gray-200 border border-white" data-alt="Candidate avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB-hMvWr8b2ArnkKwp9haUfjrnMlpUzPnAUOiPJfmzBIWhys4OF8fLfu_zSvlGiyWJL2j263v-cGMEmfz5-l9c_0tSZcOHXZ95z2OGFOh3rmKfb4j6XpKIcaB-9VWvjs2_fZX9QxJx8J80dRA2Q2154MkJprwll7XYA2q04mOivvDj_qP2YA95kE3Tcct9yshF8w_r63D8pg-rpb_hUOXAFRD6C5NmZyEwoBIQ2bQWRiCdM9WVHFaNGjsj5ICPFsxQRawhpbYyaBps')"></div>
+<div class="size-6 rounded-full bg-gray-200 border border-white flex items-center justify-center text-[8px] font-bold">+3</div>
+</div>
+</div>
+</div>
+<!-- Activity Item 3 -->
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#e8e8f3] -ml-[1px]"></div>
+<div class="absolute left-[-15px] top-0 size-8 rounded-full bg-white border-2 border-purple-500 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px] text-purple-600">auto_awesome</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-[#0f0e1b]">Automated System</p>
+<span class="text-[10px] font-bold text-[#545095] bg-[#f0f0f5] px-2 py-0.5 rounded">3h ago</span>
+</div>
+<p class="text-sm text-[#545095] mt-1 leading-relaxed">Bulk email campaign sent to <span class="font-bold text-purple-600">12 candidates</span> regarding their application status.</p>
+</div>
+</div>
+<!-- Activity Item 4 -->
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#e8e8f3] -ml-[1px]"></div>
+<div class="absolute left-[-15px] top-0 size-8 rounded-full bg-white border-2 border-orange-400 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px] text-orange-600">assignment_turned_in</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-[#0f0e1b]">Marcus Chen</p>
+<span class="text-[10px] font-bold text-[#545095] bg-[#f0f0f5] px-2 py-0.5 rounded">5h ago</span>
+</div>
+<p class="text-sm text-[#545095] mt-1 leading-relaxed">Completed initial screening for <span class="font-bold text-[#0f0e1b]">Elena Gilbert</span>. Rating: <span class="text-orange-500 font-bold">4.5/5.0</span></p>
+</div>
+</div>
+<!-- Activity Item 5 -->
+<div class="relative pl-8 group">
+<div class="absolute left-0 top-0 bottom-0 w-0.5 bg-[#e8e8f3] -ml-[1px]"></div>
+<div class="absolute left-[-15px] top-0 size-8 rounded-full bg-white border-2 border-red-400 flex items-center justify-center z-10">
+<span class="material-symbols-outlined text-[16px] text-red-600">block</span>
+</div>
+<div>
+<div class="flex justify-between items-start">
+<p class="text-sm font-bold text-[#0f0e1b]">Sarah Meyer</p>
+<span class="text-[10px] font-bold text-[#545095] bg-[#f0f0f5] px-2 py-0.5 rounded">Yesterday</span>
+</div>
+<p class="text-sm text-[#545095] mt-1 leading-relaxed">Rejected <span class="font-bold text-[#0f0e1b]">Tom Riddle</span> from UX Designer role. Reason: <span class="italic">Culture fit mismatch</span>.</p>
+</div>
+</div>
+</div>
+<div class="p-4 bg-[#f9f8fb] border-t border-[#e8e8f3]">
+<button class="w-full py-2 bg-white border border-primary/20 text-primary rounded-lg text-sm font-bold hover:bg-primary/5 transition-all">
+                    View Full History
+                </button>
+</div>
+</aside>
+</main>
+<!-- Floating Action Button -->
+<button class="fixed bottom-8 right-8 size-14 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[60]">
+<span class="material-symbols-outlined text-[28px]">add</span>
+</button>
+</div>
+</body></html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RecruitFlow - Job Management &amp; Pipeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e5e7eb;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-background-light font-display text-slate-900">
+<div class="relative flex min-h-screen flex-col overflow-x-hidden">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between border-b border-slate-200 bg-white px-8 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-12">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">account_tree</span>
+</div>
+<h2 class="text-xl font-extrabold tracking-tight text-slate-900">RecruitFlow</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold text-slate-600 hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-sm font-semibold text-primary border-b-2 border-primary py-4 -mb-4" href="#">Jobs</a>
+<a class="text-sm font-semibold text-slate-600 hover:text-primary transition-colors" href="#">Talent</a>
+<a class="text-sm font-semibold text-slate-600 hover:text-primary transition-colors" href="#">Analytics</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden sm:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">search</span>
+<input class="h-10 w-64 rounded-lg border-slate-200 bg-slate-50 pl-10 text-sm focus:border-primary focus:ring-primary" placeholder="Search pipeline..." type="text"/>
+</div>
+<button class="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<div class="h-10 w-10 overflow-hidden rounded-full bg-slate-200 border-2 border-slate-100 shadow-sm" data-alt="User profile avatar circle">
+<img alt="Recruiter profile photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtYZCoMiF77kCo6gNdu68HqVgSmOR6vjCHnwwd8hG6Myqp8arueyTRGr_eZIWdd19Sd2c0EV7o8Mp4K-lw3K6uC_mhAftLiBK1VPpvb1xhJd9VoHcxv2cAxsbG1B_-JN94LjAoY31Huw-OOfp5rquG7Vmatw9XAJqFgIY-oNB2yzFBJPeyUVupdjJDTN0wyhIteD8RyWfiNhs0msuFEiHmbnnnHWmp3n0HFVg-NI-bTaavHN5HVGnoaj4iBJAsLJdCU-TClhxDbZA"/>
+</div>
+</div>
+</header>
+<main class="flex-1 px-8 py-6">
+<!-- Breadcrumbs -->
+<nav class="mb-4 flex items-center gap-2 text-sm font-medium text-slate-500">
+<a class="hover:text-primary transition-colors" href="#">Jobs</a>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-slate-900">Senior Full Stack Engineer</span>
+</nav>
+<!-- Job Header Section -->
+<div class="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3">
+<h1 class="text-3xl font-black tracking-tight text-slate-900">Senior Full Stack Engineer</h1>
+<span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-700 uppercase tracking-wide">Active</span>
+</div>
+<div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-slate-600">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg opacity-70">corporate_fare</span>
+<span class="font-semibold text-slate-700">TechCorp Solutions</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg opacity-70">location_on</span>
+<span>London, UK (Remote Friendly)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-lg opacity-70">payments</span>
+<span>£85,000 - £110,000</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm">
+<span class="material-symbols-outlined text-lg">edit</span>
+                        Edit Job
+                    </button>
+<button class="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50 shadow-sm">
+<span class="material-symbols-outlined text-lg">share</span>
+</button>
+<button class="flex items-center gap-2 rounded-lg bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">
+<span class="material-symbols-outlined text-lg">auto_awesome</span>
+                        Trigger n8n Enrichment
+                    </button>
+</div>
+</div>
+<!-- Pipeline Filters & Summary -->
+<div class="mb-6 flex flex-wrap items-center justify-between border-y border-slate-200 py-3">
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2">
+<span class="text-sm font-semibold text-slate-500">Pipeline Filter:</span>
+<div class="flex -space-x-1">
+<button class="rounded-l-lg border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-800">All Candidates (24)</button>
+<button class="border-y border-r border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Internal (8)</button>
+<button class="rounded-r-lg border-y border-r border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50">Agency (16)</button>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:text-primary"><span class="material-symbols-outlined">tune</span></button>
+<button class="p-2 text-slate-500 hover:text-primary"><span class="material-symbols-outlined">sort</span></button>
+</div>
+</div>
+<!-- Kanban Board Container -->
+<div class="custom-scrollbar flex h-[calc(100vh-320px)] gap-6 overflow-x-auto pb-4">
+<!-- Sourced Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider">Sourced</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black">6</span>
+</div>
+<button class="text-slate-400 hover:text-primary"><span class="material-symbols-outlined text-lg">add_circle</span></button>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-slate-100/50 p-3">
+<!-- Candidate Card -->
+<div class="group relative cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-primary/40 hover:shadow-md active:cursor-grabbing">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Candidate headshot profile">
+<img alt="Sarah Miller" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeQ9K33zG5EXtsRjqTu_uNY0A2-y4aCm0_ruRKNHEc1XAzz323shv6mJ6xxS4UI0aDx8xcBuUaSGTfRHptNtOxcr0JFIkyh1m4_LkI8pdiW__ucxv7JyMp96CZDeoJ-5PWyYyB9On9koV2UFzXojx4yMHXpScFnPS081EOrQlup2bU_7_bMEYfNIl9b58k7M28Dif0XIQdwfbz0KCqKgl-8wKhedeVMp3ZJOm2a1V1Z3d5WSJaxFKf24Lhh4G1QCFl6YOIrGgQMCg"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900 group-hover:text-primary">Sarah Miller</h4>
+<p class="text-[11px] font-medium text-slate-500">Full Stack @ Veloce Labs</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-lg">more_vert</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined text-xs fill-1">auto_awesome</span>
+<span class="text-[10px] font-bold">Enriched</span>
+</div>
+<span class="text-[10px] font-medium text-slate-400">2h ago</span>
+</div>
+</div>
+<div class="group relative cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-primary/40 hover:shadow-md active:cursor-grabbing">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Candidate profile picture">
+<img alt="Marcus Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCObjgYBrbOaxajh9SHskYKdlMM7fatr3Tufqezs2Clmls7MZVAwydXq4QP2qP_Hm8SvFTzyDLX6Kq2XtGJFF5l-oGW0mIiqRqt0KDcD5-G53iTdEOZxv8A9oHESkyV5SmuiCb1hWwNWJ21NwpbO2RtKLv9XL6eGiY7G_9ixEm1sY9v05dNaNhFHNsmLu0GqsZUfaOcCtnzxm5aGEsXQP5v69U2eP24VJVRQZrHvBoCfLyxnVBpLNM1HjXPTEwRBkY2YR8cIMDP8W0"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Marcus Chen</h4>
+<p class="text-[11px] font-medium text-slate-500">React Dev @ Fintech Inc</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-slate-400">
+<span class="material-symbols-outlined text-xs">hourglass_empty</span>
+<span class="text-[10px] font-bold">Pending n8n</span>
+</div>
+<span class="text-[10px] font-medium text-slate-400">Yesterday</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Screening Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider">Screening</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black">4</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-slate-100/50 p-3">
+<div class="group relative cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-primary/40 active:cursor-grabbing">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Candidate profile shot">
+<img alt="Elena Rodriguez" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnh8tU_SM08QvQ4CZhrzBS2QU32Nyu1qQ-0Wu1CuuUHfQmBi4zhUUFrLHYXPRH4hY0t8Nv2DnhxU-ZWYgPFqO6giMsCEzbnJjkz9J-4vJDKfQYfLqj3mXTLKT6KtQzGdXGCYW1Epc6wECYFJrKZLV2hEB65K5QT0toa7P-reGd9XMSpRMx1vYvvhULD9IOwVlbegZikHrulH80jvVTunWCZY3oAHVaDF4iPA1QmUgRk4kBZ25omi3KABLyk_2w9LD9Idx-Dq81Y6E"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Elena Rodriguez</h4>
+<p class="text-[11px] font-medium text-slate-500">Senior Dev @ Cloudscale</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined text-xs fill-1">auto_awesome</span>
+<span class="text-[10px] font-bold">Enriched</span>
+</div>
+<div class="flex items-center gap-1 text-[10px] font-bold text-yellow-600">
+<span class="material-symbols-outlined text-[14px]">calendar_month</span>
+                                    In 2h
+                                </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Interviewing Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider">Interviewing</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black">2</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-slate-100/50 p-3">
+<div class="group relative cursor-grab rounded-lg border-2 border-dashed border-slate-300 bg-white/40 p-4">
+<div class="mb-3 flex items-start gap-3 opacity-40">
+<div class="h-10 w-10 shrink-0 rounded-lg bg-slate-200"></div>
+<div class="flex-1 space-y-2">
+<div class="h-3 w-20 rounded bg-slate-200"></div>
+<div class="h-2 w-32 rounded bg-slate-200"></div>
+</div>
+</div>
+<div class="flex justify-center italic text-xs text-slate-400 font-medium">Drop candidate here</div>
+</div>
+<div class="group relative cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm hover:border-primary/40 active:cursor-grabbing">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Candidate portrait image">
+<img alt="Amelia Watson" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWiKE3pv8alytGz1x96v2EZ-hImGu9Wk_E-itOS1iMrXzjmgUxMBiX0QPJz4CqY3LOnfZ32HF2Nk9S-T40FFuDrr95bkiON1Og4m67KeR1Qz_JoSmJZucc9cwwhMaHoZlDiijmXMgryAbgBiyKtkgYIo6SPneqIHkhA-6UsAXwGB63BUhThH7WhUK6JI-dkfFaTKRVJNOLbgVefYflKKZ65q8vEhd-W2qhz6bSnPjFxEO9BjqjBm78DF2KctMWGdEStXtOqfem7yg"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Amelia Watson</h4>
+<p class="text-[11px] font-medium text-slate-500">Staff Eng @ Globex</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-primary">
+<span class="material-symbols-outlined text-xs fill-1">auto_awesome</span>
+<span class="text-[10px] font-bold">Enriched</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400">Round 2</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Technical Assessment Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider text-primary">Technical Assessment</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-white text-[10px] font-black">3</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-primary/5 p-3 border border-primary/10">
+<div class="group relative cursor-grab rounded-lg border border-primary/20 bg-white p-4 shadow-sm hover:shadow-md">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Professional profile image">
+<img alt="Liam Davies" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwVP5T6Vmn1FJe9uRBmu-l_e2e7xXZWH-pMBT4ddWfq54zhvXfvzydGyx8onSWDssUeFyopqSrpw7eiluiyBoVp-IUO2i0fxEptTH_pWSfE_f7QJtlOdPf_DPXnGRckSj5NOyD7zNOyXj9qoRlPAa6QamRrST_aXTgGo4SysIGYXuajS6EVYTGJ8Y94KnpCi4i9BiEyPTcxc-_CWgPSVpCS7hqjq4FmXJxfMPZIBRc7aUHOWPgOev7kuEarmBTJBRhvyommSI-IqQ"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900 group-hover:text-primary transition-colors">Liam Davies</h4>
+<p class="text-[11px] font-medium text-slate-500">Backend @ NodeSystems</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-blue-600">
+<span class="material-symbols-outlined text-xs">code</span>
+<span class="text-[10px] font-bold">In Review</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400">Score: 88%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Offer Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider">Offer</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-slate-200 text-[10px] font-black">1</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-slate-100/50 p-3">
+<div class="group relative cursor-grab rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+<div class="mb-3 flex items-start justify-between">
+<div class="flex items-center gap-3">
+<div class="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-slate-100" data-alt="Candidate profile headshot">
+<img alt="Chloe Fisher" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBRTWazqOHJFWxFcKWXC7NWAAB7W2kSsdUg_12nJ-8aAC_7XAAazeFrLVWRj7wgwwTkVObgQQCEZOh_DXFtkHCTuydnqanvglNHdtVQvgB6roD7ap8mTfpNrwYXeR_aaAz_d4bJoJk4gMrRDwrAIbwArShe-aQu6yhKSYOtCAEBlGMrFwvL_MJdWzFDgBP914HL2e9aKwZ8TyPwc_el1zLNE5HvfiqTcW2jbHWc1aBNA0y5djlvyRLOh9c0TL0Mc9pDwKhIkuEkgg"/>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900">Chloe Fisher</h4>
+<p class="text-[11px] font-medium text-slate-500">Tech Lead @ Peak Performance</p>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 rounded-full bg-amber-50 px-2 py-0.5 text-amber-600">
+<span class="material-symbols-outlined text-xs">description</span>
+<span class="text-[10px] font-bold">Negotiating</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400">Sent 3d ago</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Hired Stage -->
+<div class="flex w-80 shrink-0 flex-col gap-4">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<h3 class="font-bold text-slate-900 uppercase text-xs tracking-wider text-green-600">Hired</h3>
+<span class="flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-white text-[10px] font-black tracking-tight">8</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col gap-3 overflow-y-auto rounded-xl bg-green-50 p-3 border border-green-100">
+<div class="flex flex-col items-center justify-center py-8 text-center">
+<div class="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
+<span class="material-symbols-outlined text-2xl">celebration</span>
+</div>
+<p class="text-xs font-bold text-green-800">Success Pipeline</p>
+<p class="text-[10px] text-green-600">8 hires made this quarter</p>
+</div>
+<!-- Mini Card for Hired History -->
+<div class="rounded-lg bg-white/60 p-2.5 text-xs border border-green-200/50 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="h-6 w-6 rounded-full overflow-hidden" data-alt="Candidate hired profile">
+<img alt="Hired candidate" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4q41luWBPHFTfWZ_VZ5_jyFe41rkuvCiM2JtSIiPXRlZUGGkKzCdnpU2P8a-YlIxBifMncw0vBvRh2xgM255NF7oRB7nYAaXkt02ckUtDMls3DKYz0jhT6vH7tzRzIR_qpsN-EFUBRr0y81Ur5GD7kZuhKT8-_bakbEqfQo7r3yDykA5g8ykJFeM-7OpgKoWo7Fc3ZefbYwVahmq1KSALkUnrqRgPlwWPX11o4RH5PGLrZJnm7v4vIJogfMMom22SM4YLqe72KR0"/>
+</div>
+<span class="font-bold text-slate-700">Jessica S.</span>
+</div>
+<span class="text-[10px] font-medium text-slate-400">Start: Sep 1</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Enrichment Toast (n8n Indicator) -->
+<div class="fixed bottom-6 right-8 z-[100] flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-2xl">
+<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined animate-spin-slow">sync</span>
+</div>
+<div>
+<p class="text-sm font-bold text-slate-900">n8n Enrichment in Progress</p>
+<p class="text-xs text-slate-500">Enriching 3 candidates in Sourced...</p>
+</div>
+<button class="ml-4 text-slate-400 hover:text-slate-600"><span class="material-symbols-outlined text-lg">close</span></button>
+</div>
+</div>
+<style>
+        @keyframes spin-slow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 3s linear infinite;
+        }
+    </style>
+</body></html>

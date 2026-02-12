@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Client Portal - Hiring Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .pipeline-step-active {
+            @apply bg-primary text-white;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="sticky top-0 z-50 w-full bg-white dark:bg-background-dark/95 border-b border-primary/10 backdrop-blur-sm">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="flex justify-between items-center h-16">
+<div class="flex items-center gap-3">
+<div class="bg-primary p-1.5 rounded-lg">
+<svg class="w-6 h-6 text-white" fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">PartnerPortal</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex items-center bg-primary/5 dark:bg-primary/10 px-4 py-1.5 rounded-full border border-primary/10">
+<span class="text-xs font-semibold text-primary uppercase tracking-wider">Acme Corp HQ</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/20 overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="User profile avatar of the hiring manager" src="https://lh3.googleusercontent.com/aida-public/AB6AXuArA6d8oaRKQtjs-QPKi2u4zQgS2u5i8cBKhrYKgY2rRYXlSB3jas1jZksd8CIHZdT7kUqOydw8hvPRDYy_SnFcucXIOO7NLfDiWVrjjqz6ta8Hc-UACFkEf2-J1DsH-Wq6YQOVaPQVO8C8XJr5R7cix6tt3p1NkLsV7qavBdIB34sweAhP_VvFbZBYst0RYRhIU6ffaWFW5F_8_nDZvJ8TFW44craXQAkQ-UEtse8ar31AGEHnqSPnLIhUKFU8jUYUeV0FwMIkkaQ"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<!-- Welcome Header -->
+<div class="mb-8">
+<h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Good morning, Alex</h1>
+<p class="text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-2">
+                You have <span class="text-primary font-bold">4 candidates</span> awaiting feedback across 2 active roles.
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+<span class="text-xs uppercase tracking-widest">Last updated 12m ago</span>
+</p>
+</div>
+<!-- Metric Overview Cards -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">work_outline</span>
+</div>
+<span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">+1 this week</span>
+</div>
+<p class="text-sm text-slate-500 font-medium">Total Active Roles</p>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">2</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-primary/20 dark:border-primary/30 shadow-sm ring-1 ring-primary/5">
+<div class="flex items-center justify-between mb-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">pending_actions</span>
+</div>
+<span class="animate-pulse flex h-2 w-2 rounded-full bg-primary"></span>
+</div>
+<p class="text-sm text-slate-500 font-medium">Pending Reviews</p>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">4</p>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="p-2 bg-primary/10 rounded-lg">
+<span class="material-symbols-outlined text-primary">event_available</span>
+</div>
+</div>
+<p class="text-sm text-slate-500 font-medium">Scheduled Interviews</p>
+<p class="text-3xl font-bold text-slate-900 dark:text-white">6</p>
+</div>
+</div>
+<!-- Filter / Role Selector -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+<h2 class="text-xl font-bold text-slate-900 dark:text-white">Candidates Under Review</h2>
+<div class="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+<button class="px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg shadow-sm whitespace-nowrap">
+                    All Roles
+                </button>
+<button class="px-4 py-2 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-sm font-medium rounded-lg hover:border-primary transition-colors whitespace-nowrap">
+                    Senior Full Stack Engineer
+                </button>
+<button class="px-4 py-2 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-sm font-medium rounded-lg hover:border-primary transition-colors whitespace-nowrap">
+                    Product Designer
+                </button>
+</div>
+</div>
+<!-- Candidate Review List -->
+<div class="space-y-6">
+<!-- Candidate Card 1 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:border-primary/30 transition-all duration-300">
+<div class="p-6 md:p-8">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+<!-- Profile Info -->
+<div class="flex items-start gap-5">
+<div class="relative">
+<img class="w-16 h-16 rounded-xl object-cover" data-alt="Headshot profile of Sarah Jenkins" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAvlI9uL7i-w7RRQTDNo9nSIhSdN77qOO7-2bojXcu06x0n3Q0hlcoXeouYJ_nnso2q6Uiv-lhgQTmKaXWhb_0uVDd-tkvAB7Hx5EtHsLBEj9nJo4x2RVGO-4bbhK1s-nAsNbCrNIc_nt0hXEbtX1p-bmOuzPbX61eZ-RgWk-nvALh_y4kjRLl9PpcSlz9uEG4_bdF4wHIBxFVPg9yxuhAiRQ8pWKyAc20BZel5j7LitizuSAD8r06ghyjrNl-8ls9WjPpwfoddit4"/>
+<span class="absolute -bottom-1 -right-1 flex h-4 w-4 rounded-full bg-emerald-500 border-2 border-white"></span>
+</div>
+<div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Sarah Jenkins</h3>
+<p class="text-sm text-slate-500 mb-1">Applying for <span class="font-semibold text-slate-700 dark:text-slate-300">Senior Full Stack Engineer</span></p>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 uppercase tracking-tight">
+                                        Technical Assessment
+                                    </span>
+<span class="text-xs text-slate-400">Received 2 days ago</span>
+</div>
+</div>
+</div>
+<!-- Pipeline Status (Visual) -->
+<div class="flex-1 max-w-sm lg:px-8">
+<div class="flex justify-between mb-2">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Hiring Journey</span>
+<span class="text-xs font-bold text-primary uppercase tracking-widest">60%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden flex gap-0.5">
+<div class="bg-primary h-full w-1/4"></div>
+<div class="bg-primary h-full w-1/4"></div>
+<div class="bg-primary/40 h-full w-1/4"></div>
+<div class="bg-slate-200 dark:bg-slate-700 h-full w-1/4"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-slate-400 font-medium">Applied</span>
+<span class="text-[10px] text-primary font-bold">Tech Test</span>
+<span class="text-[10px] text-slate-400 font-medium">Final</span>
+<span class="text-[10px] text-slate-400 font-medium">Offer</span>
+</div>
+</div>
+<!-- Decision Buttons -->
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex-1 lg:flex-none px-6 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg shadow-sm transition-all transform active:scale-95">
+                                Approve for Interview
+                            </button>
+<button class="flex-1 lg:flex-none px-6 py-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg transition-all">
+                                Decline
+                            </button>
+</div>
+</div>
+<!-- Summary Area -->
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-start gap-4 p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-primary text-xl mt-0.5">auto_awesome</span>
+<div>
+<h4 class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Recruiter Summary</h4>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    "Sarah demonstrated exceptional architectural knowledge during her technical screen. She successfully led a migration of a legacy monolithic system to microservices at her previous role. Strong background in React and specifically interested in our fintech expansion goals."
+                                </p>
+</div>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="text-sm font-bold text-primary hover:underline flex items-center gap-1 group/link">
+                            View Full Candidate Profile
+                            <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Candidate Card 2 -->
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:border-primary/30 transition-all duration-300">
+<div class="p-6 md:p-8">
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+<!-- Profile Info -->
+<div class="flex items-start gap-5">
+<div class="relative">
+<img class="w-16 h-16 rounded-xl object-cover" data-alt="Headshot profile of Marcus Chen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZD44llWoVSNmT1j4-IIq_IILE9fpLOSzO7XIOHUzJDGzqYbIpQWvKKAp1fXgYmEgLwPA43cyvhJgnggzCF1Pn1980ULJFat5FDDu5e7b8a8TkOSyIvZVqMtyJGNvuy8LoF0nudcFNmAZ2RXuYJBTXHrEHOljLobLXr5ZMWh1tAzHjJTzXQUiDkp1NBzeqM-6ucsewRvA9rSJjDGdEqmS2fBdKAt2bRVezDB-XlpEHaFsX55BmeEkw-gnBnqjbzcA_P8I-h9q0xbo"/>
+</div>
+<div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Marcus Chen</h3>
+<p class="text-sm text-slate-500 mb-1">Applying for <span class="font-semibold text-slate-700 dark:text-slate-300">Product Designer</span></p>
+<div class="flex items-center gap-3">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary uppercase tracking-tight">
+                                        Portfolio Reviewed
+                                    </span>
+<span class="text-xs text-slate-400">Received 5 hours ago</span>
+</div>
+</div>
+</div>
+<!-- Pipeline Status (Visual) -->
+<div class="flex-1 max-w-sm lg:px-8">
+<div class="flex justify-between mb-2">
+<span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Hiring Journey</span>
+<span class="text-xs font-bold text-primary uppercase tracking-widest">25%</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden flex gap-0.5">
+<div class="bg-primary h-full w-1/4"></div>
+<div class="bg-slate-200 dark:bg-slate-700 h-full w-1/4"></div>
+<div class="bg-slate-200 dark:bg-slate-700 h-full w-1/4"></div>
+<div class="bg-slate-200 dark:bg-slate-700 h-full w-1/4"></div>
+</div>
+<div class="flex justify-between mt-2">
+<span class="text-[10px] text-primary font-bold">Applied</span>
+<span class="text-[10px] text-slate-400 font-medium">Design Task</span>
+<span class="text-[10px] text-slate-400 font-medium">Critique</span>
+<span class="text-[10px] text-slate-400 font-medium">Offer</span>
+</div>
+</div>
+<!-- Decision Buttons -->
+<div class="flex items-center gap-3 lg:self-center">
+<button class="flex-1 lg:flex-none px-6 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-bold rounded-lg shadow-sm transition-all transform active:scale-95">
+                                Approve for Interview
+                            </button>
+<button class="flex-1 lg:flex-none px-6 py-2.5 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-sm font-bold rounded-lg transition-all">
+                                Decline
+                            </button>
+</div>
+</div>
+<!-- Summary Area -->
+<div class="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800">
+<div class="flex items-start gap-4 p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/10">
+<span class="material-symbols-outlined text-primary text-xl mt-0.5">auto_awesome</span>
+<div>
+<h4 class="text-xs font-bold text-primary uppercase tracking-wider mb-1">Recruiter Summary</h4>
+<p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+                                    "Marcus has a highly impressive portfolio with work for major SaaS brands. His case studies show a deep understanding of user psychology and data-driven design. He is moving quickly through other processes, so early feedback is recommended."
+                                </p>
+</div>
+</div>
+</div>
+<div class="mt-4 flex justify-end">
+<button class="text-sm font-bold text-primary hover:underline flex items-center gap-1 group/link">
+                            View Full Candidate Profile
+                            <span class="material-symbols-outlined text-sm group-hover/link:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Feedback Modal (Mockup overlay indicator) -->
+<div class="fixed bottom-8 right-8 max-w-sm w-full bg-slate-900 text-white p-4 rounded-xl shadow-2xl border border-white/10 hidden md:block">
+<div class="flex items-start gap-4">
+<div class="bg-primary/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">tips_and_updates</span>
+</div>
+<div>
+<h5 class="text-sm font-bold">Pro-tip</h5>
+<p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                        Declining a candidate? Providing a quick reason helps our team refine the search for your next perfect hire.
+                    </p>
+</div>
+<button class="text-slate-500 hover:text-white transition-colors">
+<span class="material-symbols-outlined text-sm">close</span>
+</button>
+</div>
+</div>
+</main>
+<footer class="mt-12 border-t border-slate-200 dark:border-slate-800 py-8 bg-white dark:bg-background-dark">
+<div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+<p class="text-sm text-slate-500">© 2023 Recruitment Partners. Powered by Agency Portal.</p>
+<div class="flex gap-6">
+<a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Support</a>
+<a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-sm text-slate-500 hover:text-primary transition-colors" href="#">Feedback</a>
+</div>
+</div>
+</footer>
+</body></html>

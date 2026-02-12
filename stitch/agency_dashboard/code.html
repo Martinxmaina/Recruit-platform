@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>RecruitPro Agency Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5048e5",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#121121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased font-display">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-64 flex-shrink-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col">
+<div class="p-6 flex items-center gap-3">
+<div class="size-10 rounded-lg bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined">layers</span>
+</div>
+<div>
+<h1 class="text-lg font-bold leading-tight">RecruitPro</h1>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Multi-tenant</p>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1 overflow-y-auto">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg bg-primary/10 text-primary font-semibold" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+                    Clients
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">work</span>
+                    Jobs
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">person_search</span>
+                    Candidates
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+                    Automation
+                </a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+</nav>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGJrPhjTYwLbV7xrpPxoRBNg4Uyic_CI2i07DMfgRWKrsy4q2xVHat4vY-Ps0amL_zJnuzSHHPpFLoyEB6vP9hOclB231W-MyJNLQb7BzHfDLqBTqHXTXXTPwrFoJ1l575_6sF8IAo2d8Bb_vt164HzK38DiWFHU1fV63pZEE8Rrp6pka26At_GyhWaJAHQMB_mL_NumRDakfyL9JBf5O0G_EqxchyIIDSoq-bMb1VNPUvKCBQ4REbowSRpI-XOCgxN0uzTcY413M"/>
+</div>
+<div class="flex-1 min-w-0">
+<p class="text-sm font-semibold truncate text-slate-900 dark:text-white">Alex Thompson</p>
+<p class="text-xs text-slate-500 truncate">Lead Recruiter</p>
+</div>
+<span class="material-symbols-outlined text-slate-400">unfold_more</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+<!-- Header -->
+<header class="h-16 flex items-center justify-between px-8 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+<div class="flex items-center flex-1 max-w-xl">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-slate-100 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-primary text-sm transition-all placeholder:text-slate-500" placeholder="Search candidates, jobs, or clients..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4 ml-4">
+<button class="relative p-2 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+</button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+<span class="material-symbols-outlined text-lg">add</span>
+                        New Job
+                    </button>
+</div>
+</header>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto p-8">
+<!-- Dashboard Welcome -->
+<div class="mb-8">
+<h2 class="text-2xl font-bold text-slate-900 dark:text-white">Agency Dashboard</h2>
+<p class="text-slate-500">Welcome back, Alex. Here's what's happening with your recruitment pipeline today.</p>
+</div>
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg material-symbols-outlined">work</span>
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Active Jobs</h3>
+<p class="text-3xl font-bold mt-1">24</p>
+<div class="mt-2 flex items-center text-emerald-600 text-sm font-medium">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span>
+<span>Stable</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-lg material-symbols-outlined">groups</span>
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Candidates</h3>
+<p class="text-3xl font-bold mt-1">12,450</p>
+<div class="mt-2 flex items-center text-emerald-600 text-sm font-medium">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span>
+<span>+5%</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 rounded-lg material-symbols-outlined">event</span>
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Weekly</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Interviews</h3>
+<p class="text-3xl font-bold mt-1">18</p>
+<div class="mt-2 flex items-center text-emerald-600 text-sm font-medium">
+<span class="material-symbols-outlined text-xs mr-1">trending_up</span>
+<span>+12%</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<span class="p-2 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 rounded-lg material-symbols-outlined">verified</span>
+<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quarterly</span>
+</div>
+<h3 class="text-slate-500 text-sm font-medium">Placements</h3>
+<p class="text-3xl font-bold mt-1">12</p>
+<div class="mt-2 flex items-center text-rose-600 text-sm font-medium">
+<span class="material-symbols-outlined text-xs mr-1">trending_down</span>
+<span>-2%</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Recent Activity Feed (n8n logs) -->
+<div class="lg:col-span-1">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm h-full">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="font-bold text-slate-900 dark:text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">bolt</span>
+                                    Recent Activity
+                                </h3>
+<button class="text-primary text-xs font-semibold hover:underline">View Logs</button>
+</div>
+<div class="p-6 space-y-6">
+<div class="relative flex gap-4">
+<div class="absolute left-4 top-10 bottom-0 w-px bg-slate-200 dark:border-slate-700"></div>
+<div class="size-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0 z-10">
+<span class="material-symbols-outlined text-sm text-blue-600">search</span>
+</div>
+<div class="min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white">LinkedIn Scraper</p>
+<p class="text-sm text-slate-500">15 new candidates found matching "Senior Frontend Engineer"</p>
+<p class="text-xs text-slate-400 mt-1">2 mins ago • via n8n</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="absolute left-4 top-10 bottom-0 w-px bg-slate-200 dark:border-slate-700"></div>
+<div class="size-8 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0 z-10">
+<span class="material-symbols-outlined text-sm text-emerald-600">mail</span>
+</div>
+<div class="min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Email Parser</p>
+<p class="text-sm text-slate-500">3 new resumes added from daily inbox sync</p>
+<p class="text-xs text-slate-400 mt-1">15 mins ago • via n8n</p>
+</div>
+</div>
+<div class="relative flex gap-4">
+<div class="size-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 z-10">
+<span class="material-symbols-outlined text-sm text-primary">sync</span>
+</div>
+<div class="min-w-0">
+<p class="text-sm font-medium text-slate-900 dark:text-white">Status Webhook</p>
+<p class="text-sm text-slate-500">Application status updated for John Doe: "Interviewing"</p>
+<p class="text-xs text-slate-400 mt-1">1 hour ago • via n8n</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Upcoming Interviews Table -->
+<div class="lg:col-span-2">
+<div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+<h3 class="font-bold text-slate-900 dark:text-white">Upcoming Interviews</h3>
+<button class="text-slate-500 text-sm font-medium hover:text-primary transition-colors flex items-center gap-1">
+                                    Calendar View
+                                    <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="text-slate-500 text-xs font-semibold uppercase tracking-wider bg-slate-50 dark:bg-slate-800/50">
+<th class="px-6 py-4">Candidate</th>
+<th class="px-6 py-4">Job Title</th>
+<th class="px-6 py-4">Date &amp; Time</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Candidate avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuARDHLTb1OxqpI98GLSmUylwPo0ZwtE_W-S08b5Kaen4ij-xGgGW_SB73CJhUPTw1jID_P2Tiqz8rQdqcvOu0C5jlKY8agDsMU32CfXuePLUHgxdOTXtv5F-43IdL8shcK4GLB09-90w_LaN5wAZikehyw0jd0qAM_BdVy1TsJyuRTPFca3Kj9vS1iAZrursxHix-gmm9fqe5epqUhesCg-oHYXhGy9yaFjXbJn1_o9EUK5u5KZ5K4QQOJsMFLlg6Pq6ip5b6l1-uw"/>
+</div>
+<span class="text-sm font-medium text-slate-900 dark:text-white">Sarah Jenkins</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-600 dark:text-slate-400">UI/UX Designer</span>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-900 dark:text-white">Oct 24, 2023</p>
+<p class="text-slate-500 text-xs">10:30 AM EST</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Confirmed</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Candidate avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1mkTtXsm77UG41N-1YDLp2Zj7rgOcrMMbl78pTlyMwrQlxjRk91wE5M_RIrAZmRYu9-bxlkbBZJw4NIyFnxMOEmEI6Crq43i0uPFfi1EzpCyF7Ewrx39BY47pbTSmhCVNGbswSC_HMnkXK37u4Ijj8tdsO9WhT18JiO3LZxvXSxszQX_hZ6HQWwd6TREWz5DQcbSCFaYWqkfSDMBR1CEmkk74UTaeiOdOecsAYcyrkfzbZGHnTtDATTWmAScQxDBJ_aOiVeq_Kvw"/>
+</div>
+<span class="text-sm font-medium text-slate-900 dark:text-white">Michael Chen</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-600 dark:text-slate-400">Backend Engineer</span>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-900 dark:text-white">Oct 24, 2023</p>
+<p class="text-slate-500 text-xs">02:00 PM EST</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">Pending</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Candidate avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6UsYd7LlDzEo0e9wwXxhcOeU-RTgYmRhYHT6B5_EvArqYkJJ5EgHpadYm2fteTAFkwAUwr29K5BpOjR3Nq2CeSHK0CFPivfleYmi3S0BcLKQY6V4ENR5PEuf3MIZztDfsmWY1AA1khQYK5L7a9DvU3JpH55qZIC24WRciye7gxIHNKsjI0NIkRrUblrs9Vd1MqT0ClDnsLOwakYvftmLoPKS3RkJ8igPejOsfzTWmiatuhGct9ZmDPOSnxLVDRnEfeKJWw2-vS4c"/>
+</div>
+<span class="text-sm font-medium text-slate-900 dark:text-white">Emily Rodriguez</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-600 dark:text-slate-400">Product Manager</span>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-900 dark:text-white">Oct 25, 2023</p>
+<p class="text-slate-500 text-xs">11:00 AM EST</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Confirmed</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="Candidate avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiAlzw6WGmvA8NxQiTGDK-ydJEuL41X8dFA8Na3Q6gOj9hTgGNKY-_nTzsP-22Iaf7jZOhyLT8GNRcQ85O6ngxeuATLzOXw0cFNY-XrTHWhMIQmzZtV8z2InpE97dRWWPWROeHLqCnZBLxo8tTbsK8ZePWRaxz_I6ONzXnZA6Y3JDiTnPU1YMJEt3sI5c4griDGjVI4j3SlBPsNQ_2OBPjqnRTh6KBJFm1i8_YtXw7LZj3OtPHaT_UsRAllNigMtP4nz6mgLGuJYE"/>
+</div>
+<span class="text-sm font-medium text-slate-900 dark:text-white">David Miller</span>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="text-sm text-slate-600 dark:text-slate-400">Sales Lead</span>
+</td>
+<td class="px-6 py-4">
+<div class="text-sm">
+<p class="font-medium text-slate-900 dark:text-white">Oct 26, 2023</p>
+<p class="text-slate-500 text-xs">09:15 AM EST</p>
+</div>
+</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">Confirmed</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors text-slate-400">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-slate-200 dark:border-slate-800 text-center">
+<button class="text-sm font-semibold text-primary hover:text-primary/80 transition-colors">Load more upcoming interviews</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>
