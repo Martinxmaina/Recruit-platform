@@ -15,6 +15,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { MobileSidebar } from "./mobile-sidebar";
 import { NotificationBell } from "./notification-bell";
+import { CopilotButton } from "@/components/copilot";
 import type { Notification } from "@/app/(dashboard)/notifications/actions";
 
 interface HeaderProps {
@@ -53,6 +54,7 @@ export function Header({ notifications = [], unreadCount = 0 }: HeaderProps) {
 					</div>
 				</div>
 				<div className="ml-4 flex items-center gap-2">
+					<CopilotButton />
 					<NotificationBell notifications={notifications} unreadCount={unreadCount} />
 					<Button asChild>
 						<Link href="/jobs?new=1" className="gap-2" aria-label="Create new job">
