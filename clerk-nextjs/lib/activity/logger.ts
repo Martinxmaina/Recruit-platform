@@ -2,6 +2,7 @@
 
 import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Json } from "@/lib/supabase/types";
 
 export type ActivityLogData = {
 	entityType: "candidate" | "application" | "job" | "interview" | "note" | "tracked_candidate";
@@ -57,11 +58,11 @@ export async function createActivityLog(data: ActivityLogData) {
 		user_id: userId,
 		user_name: userName,
 		action_type: data.actionType,
-		action_details: data.actionDetails || {},
-		old_values: data.oldValues || null,
-		new_values: data.newValues || null,
+		action_details: (data.actionDetails || {}) as Json,
+		old_values: (data.oldValues || null) as Json | null,
+		new_values: (data.newValues || null) as Json | null,
 		duration_minutes: data.durationMinutes || null,
-		metadata: data.metadata || {},
+		metadata: (data.metadata || {}) as Json,
 	});
 
 	if (error) {

@@ -197,6 +197,7 @@ export async function updateApplication(
 		stage?: string;
 		status?: string;
 		screening_score?: number | null;
+		stage_change_note?: string;
 	}
 ) {
 	const { userId, orgId } = await auth();
@@ -253,12 +254,20 @@ export async function updateApplication(
 		data.stage !== currentApp.stage &&
 		data.stage_change_note
 	) {
+		// Get user name from Clerk
+		const { sessionClaims } = await auth();
+		const authorName =
+			[sessionClaims?.firstName, sessionClaims?.lastName]
+				.filter(Boolean)
+				.join(" ") || "Unknown";
+
 		const { error: noteError } = await supabase.from("notes").insert({
 			organization_id: org.id,
 			entity_type: "application",
 			entity_id: id,
 			content: `Stage changed from "${currentApp.stage}" to "${data.stage}": ${data.stage_change_note}`,
-			created_by_user_id: userId,
+			author_id: userId,
+			author_name: authorName,
 		});
 
 		if (noteError) {

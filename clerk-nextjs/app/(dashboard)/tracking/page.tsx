@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2, Eye } from "lucide-react";
 import { getTrackedCandidates, removeFromTracking } from "./actions";
 import { Button } from "@/components/ui/button";
 import {

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CandidateExperienceTab } from "@/components/candidates/candidate-experience-tab";
 import { CandidateInterviewsTab } from "@/components/candidates/candidate-interviews-tab";
 import { CandidateNotesTab } from "@/components/candidates/candidate-notes-tab";
+import { CandidateActivityTab } from "@/components/candidates/candidate-activity-tab";
 import { isCandidateTracked } from "@/app/(dashboard)/tracking/actions";
 
 export default async function CandidateDetailsPage({

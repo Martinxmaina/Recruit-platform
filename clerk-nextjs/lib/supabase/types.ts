@@ -709,6 +709,72 @@ export type Database = {
           },
         ]
       }
+      activity_logs: {
+        Row: {
+          id: string
+          organization_id: string
+          entity_type: string
+          entity_id: string
+          candidate_id: string | null
+          user_id: string
+          user_name: string
+          action_type: string
+          action_details: Json
+          old_values: Json | null
+          new_values: Json | null
+          duration_minutes: number | null
+          created_at: string | null
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          entity_type: string
+          entity_id: string
+          candidate_id?: string | null
+          user_id: string
+          user_name: string
+          action_type: string
+          action_details?: Json
+          old_values?: Json | null
+          new_values?: Json | null
+          duration_minutes?: number | null
+          created_at?: string | null
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          entity_type?: string
+          entity_id?: string
+          candidate_id?: string | null
+          user_id?: string
+          user_name?: string
+          action_type?: string
+          action_details?: Json
+          old_values?: Json | null
+          new_values?: Json | null
+          duration_minutes?: number | null
+          created_at?: string | null
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_logs_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
