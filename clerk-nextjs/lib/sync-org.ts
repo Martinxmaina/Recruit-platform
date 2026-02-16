@@ -1,16 +1,17 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "./supabase/types";
+import type { Database } from "@/lib/supabase/types";
 
 /**
  * Returns a service-role Supabase client that bypasses RLS.
  * Used only for org sync operations (not user-scoped queries).
  */
-function getServiceClient() {
-	return createClient<Database>(
-		process.env.NEXT_PUBLIC_SUPABASE_URL!,
-		process.env.SUPABASE_SERVICE_ROLE_KEY!,
-		{ auth: { persistSession: false } }
-	);
+function getServiceClient(): ReturnType<typeof createClient<Database>> | null {
+	const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+	const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+	if (!url || !key) {
+		return null;
+	}
+	return createClient<Database>(url, key, { auth: { persistSession: false } });
 }
 
 /**
@@ -23,13 +24,20 @@ function getServiceClient() {
  * @param userId     - The Clerk user ID (e.g. "user_abc123")
  * @param role       - Role to assign if inserting ("admin" | "recruiter" | "viewer")
  */
+const SUPABASE_ENV_MSG =
+	"Supabase env missing. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to .env.local in the app directory (e.g. clerk-nextjs/.env.local when running from clerk-nextjs).";
+
 export async function ensureOrgInSupabase(
 	clerkOrgId: string,
 	orgName: string,
 	userId: string,
 	role: string = "admin"
-) {
+): Promise<string | null> {
 	const supabase = getServiceClient();
+	if (!supabase) {
+		console.warn(SUPABASE_ENV_MSG);
+		return null;
+	}
 
 	// 1. Upsert the organization (insert if clerk_org_id doesn't exist yet)
 	const { data: org, error: orgError } = await supabase

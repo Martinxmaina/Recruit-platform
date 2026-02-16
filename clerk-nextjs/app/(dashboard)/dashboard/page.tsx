@@ -15,22 +15,46 @@ import {
 	getInterviewAnalytics,
 } from "@/app/(dashboard)/dashboard/actions";
 
+const EMPTY_STATS = {
+	activeJobs: 0,
+	candidates: 0,
+	interviewsThisWeek: 0,
+	placements: 0,
+};
+const EMPTY_INTERVIEW_ANALYTICS = {
+	completionRate: 0,
+	avgDaysToHire: 0,
+	byStatus: [] as { name: string; value: number }[],
+};
+
 export default async function DashboardPage() {
 	const { sessionClaims } = await auth();
 	const firstName = sessionClaims?.firstName as string | undefined;
 	const displayName = firstName ?? "there";
 
-	// Parallel data fetching
+	const supabaseConfigured =
+		!!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 	const [stats, interviews, activity, appTrends, jobStatus, pipelineFunnel, interviewAnalytics] =
-		await Promise.all([
-			getDashboardStats(),
-			getUpcomingInterviews(),
-			getRecentActivity(),
-			getApplicationsOverTime(),
-			getJobStatusDistribution(),
-			getPipelineConversionMetrics(),
-			getInterviewAnalytics(),
-		]);
+		supabaseConfigured
+			? await Promise.all([
+					getDashboardStats(),
+					getUpcomingInterviews(),
+					getRecentActivity(),
+					getApplicationsOverTime(),
+					getJobStatusDistribution(),
+					getPipelineConversionMetrics(),
+					getInterviewAnalytics(),
+				])
+			: [
+					EMPTY_STATS,
+					[],
+					[],
+					[],
+					[],
+					[],
+					EMPTY_INTERVIEW_ANALYTICS,
+				];
 
 	return (
 		<div className="space-y-8">
