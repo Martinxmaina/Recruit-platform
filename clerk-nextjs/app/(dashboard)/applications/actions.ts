@@ -1,7 +1,8 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -24,24 +25,10 @@ export async function getApplications(filters?: {
 	stage?: string;
 	status?: string;
 }) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	let query = supabase
 		.from("applications")
 		.select(
@@ -63,7 +50,7 @@ export async function getApplications(filters?: {
 			)
 		`
 		)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (filters?.job_id) {
 		query = query.eq("job_id", filters.job_id);
@@ -102,15 +89,9 @@ export async function getCandidateApplications(candidateId: string) {
 }
 
 export async function getApplication(id: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return null;
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-	if (!org) return null;
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return null;
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: application, error } = await supabase
 		.from("applications")
 		.select(
@@ -120,7 +101,7 @@ export async function getApplication(id: string) {
 		`
 		)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 	if (error) return null;
 	return application;
@@ -135,31 +116,16 @@ export async function createApplication(
 		applied_at?: string;
 	}
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Check if application already exists
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: existing } = await supabase
 		.from("applications")
 		.select("id")
 		.eq("candidate_id", candidateId)
 		.eq("job_id", jobId)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (existing) {
@@ -169,7 +135,7 @@ export async function createApplication(
 	const { data: application, error } = await supabase
 		.from("applications")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			candidate_id: candidateId,
 			job_id: jobId,
 			stage: data?.stage || "New",
@@ -200,30 +166,15 @@ export async function updateApplication(
 		stage_change_note?: string;
 	}
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Get current application to check for stage changes
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: currentApp } = await supabase
 		.from("applications")
 		.select("stage, candidate_id")
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	const updateData: Record<string, unknown> = {
@@ -238,7 +189,7 @@ export async function updateApplication(
 		.from("applications")
 		.update(updateData)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.select()
 		.single();
 
@@ -247,26 +198,23 @@ export async function updateApplication(
 		return { error: error.message };
 	}
 
-	// If stage changed and note provided, create a note entry
 	if (
 		data.stage !== undefined &&
 		currentApp &&
 		data.stage !== currentApp.stage &&
 		data.stage_change_note
 	) {
-		// Get user name from Clerk
-		const { sessionClaims } = await auth();
+		const user = await getCurrentUser();
 		const authorName =
-			[sessionClaims?.firstName, sessionClaims?.lastName]
-				.filter(Boolean)
-				.join(" ") || "Unknown";
+			(user?.user_metadata?.full_name as string) ??
+			(user?.email ?? "Unknown");
 
 		const { error: noteError } = await supabase.from("notes").insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			entity_type: "application",
 			entity_id: id,
 			content: `Stage changed from "${currentApp.stage}" to "${data.stage}": ${data.stage_change_note}`,
-			author_id: userId,
+			author_id: ctx.userId,
 			author_name: authorName,
 		});
 
@@ -281,29 +229,15 @@ export async function updateApplication(
 }
 
 export async function deleteApplication(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("applications")
 		.delete()
 		.eq("id", id)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error deleting application:", error);

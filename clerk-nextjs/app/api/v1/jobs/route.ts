@@ -1,13 +1,10 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import { getJobs, createJob } from "@/app/(dashboard)/jobs/actions";
-import { getOrgId, jsonResponse, errorResponse } from "@/lib/api/helpers";
+import { getCurrentUserOrg, jsonResponse, errorResponse } from "@/lib/api/helpers";
 
 export async function GET(request: NextRequest) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return errorResponse("Unauthorized", 401);
-	const org = await getOrgId(userId, orgId);
-	if (!org) return errorResponse("Organization not found", 404);
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return errorResponse("Unauthorized", 401);
 
 	const { searchParams } = request.nextUrl;
 	const filters = {
@@ -22,10 +19,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return errorResponse("Unauthorized", 401);
-	const org = await getOrgId(userId, orgId);
-	if (!org) return errorResponse("Organization not found", 404);
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return errorResponse("Unauthorized", 401);
 
 	let body: unknown;
 	try {

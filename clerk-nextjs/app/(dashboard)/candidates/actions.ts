@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -25,24 +25,10 @@ export async function getCandidates(filters?: {
 	search?: string;
 	source?: string;
 }) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	let query = supabase
 		.from("candidates")
 		.select(
@@ -62,7 +48,7 @@ export async function getCandidates(filters?: {
 			)
 		`
 		)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (filters?.search) {
 		query = query.or(
@@ -87,29 +73,15 @@ export async function getCandidates(filters?: {
 }
 
 export async function getCandidate(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return null;
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: candidate, error } = await supabase
 		.from("candidates")
 		.select("*")
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (error) {
@@ -131,28 +103,14 @@ export async function createCandidate(data: {
 	resume_url?: string | null;
 	source?: string | null;
 }) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: candidate, error } = await supabase
 		.from("candidates")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			full_name: data.full_name,
 			email: data.email || null,
 			phone: data.phone || null,
@@ -189,24 +147,10 @@ export async function updateCandidate(
 		source?: string | null;
 	}
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const updateData: Record<string, unknown> = {
 		updated_at: new Date().toISOString(),
 	};
@@ -225,7 +169,7 @@ export async function updateCandidate(
 		.from("candidates")
 		.update(updateData)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.select()
 		.single();
 
@@ -240,29 +184,15 @@ export async function updateCandidate(
 }
 
 export async function deleteCandidate(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("candidates")
 		.delete()
 		.eq("id", id)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error deleting candidate:", error);
@@ -274,24 +204,10 @@ export async function deleteCandidate(id: string) {
 }
 
 export async function getCandidateApplications(candidateId: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	if (!userId || !orgId) {
-		return [];
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: applications, error } = await supabase
 		.from("applications")
 		.select(
@@ -308,7 +224,7 @@ export async function getCandidateApplications(candidateId: string) {
 		`
 		)
 		.eq("candidate_id", candidateId)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("applied_at", { ascending: false });
 
 	if (error) {

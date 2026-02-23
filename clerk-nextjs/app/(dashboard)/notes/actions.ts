@@ -1,7 +1,8 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { revalidatePath } from "next/cache";
 
 export type Note = {
@@ -17,22 +18,14 @@ export type Note = {
 };
 
 export async function getNotes(entityType: string, entityId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data, error } = await supabase
 		.from("notes")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.eq("entity_type", entityType)
 		.eq("entity_id", entityId)
 		.order("created_at", { ascending: false });
@@ -50,32 +43,21 @@ export async function createNote(
 	entityId: string,
 	content: string
 ) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return { error: "Unauthorized" };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { error: "Organization not found" };
-
-	// Get user name from Clerk
-	const { sessionClaims } = await auth();
+	const user = await getCurrentUser();
 	const authorName =
-		[sessionClaims?.firstName, sessionClaims?.lastName]
-			.filter(Boolean)
-			.join(" ") || "Unknown";
+		(user?.user_metadata?.full_name as string) ?? (user?.email ?? "Unknown");
 
+	const supabase = await createAdminClient(ctx.userId);
 	const { data, error } = await supabase
 		.from("notes")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			entity_type: entityType,
 			entity_id: entityId,
-			author_id: userId,
+			author_id: ctx.userId,
 			author_name: authorName,
 			content,
 		})
@@ -94,23 +76,15 @@ export async function createNote(
 }
 
 export async function deleteNote(noteId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return { error: "Unauthorized" };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { error: "Organization not found" };
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("notes")
 		.delete()
 		.eq("id", noteId)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error deleting note:", error);

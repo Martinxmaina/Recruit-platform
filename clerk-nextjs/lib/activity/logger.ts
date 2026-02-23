@@ -1,7 +1,8 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import type { Json } from "@/lib/supabase/types";
 
 export type ActivityLogData = {
@@ -18,44 +19,26 @@ export type ActivityLogData = {
 
 /**
  * Create an activity log entry
- * Automatically extracts user info from auth context and organization
+ * Uses current Supabase user and org from session.
  */
 export async function createActivityLog(data: ActivityLogData) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) {
 		console.warn("Cannot create activity log: user not authenticated");
 		return { error: "Unauthorized" };
 	}
 
-	const supabase = await createAdminClient(userId);
+	const user = await getCurrentUser();
+	const userName =
+		(user?.user_metadata?.full_name as string) ?? user?.email ?? ctx.userId;
 
-	// Get organization_id
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Get user name from Clerk (fallback to user ID)
-	let userName = userId;
-	try {
-		// In a real implementation, you might fetch user name from Clerk
-		// For now, use userId as fallback
-		userName = userId;
-	} catch {
-		// Use userId as fallback
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase.from("activity_logs").insert({
-		organization_id: org.id,
+		organization_id: ctx.orgId,
 		entity_type: data.entityType,
 		entity_id: data.entityId,
 		candidate_id: data.candidateId || null,
-		user_id: userId,
+		user_id: ctx.userId,
 		user_name: userName,
 		action_type: data.actionType,
 		action_details: (data.actionDetails || {}) as Json,

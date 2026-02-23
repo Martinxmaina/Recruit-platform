@@ -3,16 +3,12 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/v1/jobs/route";
 import { GET as GET_ONE, PATCH, DELETE } from "@/app/api/v1/jobs/[id]/route";
 
-vi.mock("@clerk/nextjs/server", () => ({
-	auth: vi.fn(),
-}));
-
 vi.mock("@/lib/api/helpers", async (importOriginal) => {
 	const actual =
 		await importOriginal<typeof import("@/lib/api/helpers")>();
 	return {
 		...actual,
-		getOrgId: vi.fn(),
+		getCurrentUserOrg: vi.fn(),
 	};
 });
 
@@ -24,8 +20,7 @@ vi.mock("@/app/(dashboard)/jobs/actions", () => ({
 	deleteJob: vi.fn(),
 }));
 
-import { auth } from "@clerk/nextjs/server";
-import { getOrgId } from "@/lib/api/helpers";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import {
 	getJobs,
 	getJob,
@@ -36,26 +31,18 @@ import {
 
 describe("GET /api/v1/jobs", () => {
 	beforeEach(() => {
-		vi.mocked(auth).mockResolvedValue({
+		vi.mocked(getCurrentUserOrg).mockResolvedValue({
 			userId: "user-1",
-			orgId: "org-1",
-		} as any);
-		vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+			orgId: "org-uuid",
+		});
 		vi.mocked(getJobs).mockResolvedValue([]);
 	});
 
 	it("returns 401 when not authenticated", async () => {
-		vi.mocked(auth).mockResolvedValue({ userId: null, orgId: null } as any);
+		vi.mocked(getCurrentUserOrg).mockResolvedValue(null);
 		const req = new NextRequest("http://localhost/api/v1/jobs");
 		const res = await GET(req);
 		expect(res.status).toBe(401);
-	});
-
-	it("returns 404 when org not found", async () => {
-		vi.mocked(getOrgId).mockResolvedValue(null);
-		const req = new NextRequest("http://localhost/api/v1/jobs");
-		const res = await GET(req);
-		expect(res.status).toBe(404);
 	});
 
 	it("returns 200 and list of jobs", async () => {
@@ -71,8 +58,10 @@ describe("GET /api/v1/jobs", () => {
 
 describe("POST /api/v1/jobs", () => {
 	beforeEach(() => {
-		vi.mocked(auth).mockResolvedValue({ userId: "user-1", orgId: "org-1" } as any);
-		vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+		vi.mocked(getCurrentUserOrg).mockResolvedValue({
+			userId: "user-1",
+			orgId: "org-uuid",
+		});
 		vi.mocked(createJob).mockResolvedValue({
 			data: { id: "j1", title: "Test Job" },
 		} as any);
@@ -101,8 +90,10 @@ describe("POST /api/v1/jobs", () => {
 
 describe("GET /api/v1/jobs/[id]", () => {
 	beforeEach(() => {
-		vi.mocked(auth).mockResolvedValue({ userId: "user-1", orgId: "org-1" } as any);
-		vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+		vi.mocked(getCurrentUserOrg).mockResolvedValue({
+			userId: "user-1",
+			orgId: "org-uuid",
+		});
 	});
 
 	it("returns 404 when job not found", async () => {
@@ -125,8 +116,10 @@ describe("GET /api/v1/jobs/[id]", () => {
 
 describe("PATCH /api/v1/jobs/[id]", () => {
 	beforeEach(() => {
-		vi.mocked(auth).mockResolvedValue({ userId: "user-1", orgId: "org-1" } as any);
-		vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+		vi.mocked(getCurrentUserOrg).mockResolvedValue({
+			userId: "user-1",
+			orgId: "org-uuid",
+		});
 		vi.mocked(updateJob).mockResolvedValue({
 			data: { id: "j1", title: "Updated" },
 		} as any);
@@ -146,8 +139,10 @@ describe("PATCH /api/v1/jobs/[id]", () => {
 
 describe("DELETE /api/v1/jobs/[id]", () => {
 	beforeEach(() => {
-		vi.mocked(auth).mockResolvedValue({ userId: "user-1", orgId: "org-1" } as any);
-		vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+		vi.mocked(getCurrentUserOrg).mockResolvedValue({
+			userId: "user-1",
+			orgId: "org-uuid",
+		});
 		vi.mocked(deleteJob).mockResolvedValue({ success: true } as any);
 	});
 

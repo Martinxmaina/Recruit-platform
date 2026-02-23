@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 import type { ExecuteActionRequest, ExecuteActionResponse } from "@/lib/copilot/types";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 
 // Initialize Supabase admin client
 function getSupabaseAdmin() {
@@ -13,8 +13,8 @@ function getSupabaseAdmin() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const ctx = await getCurrentUserOrg();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Execute the action
-    const result = await executeAction(orgId, userId, actionId, { ...body });
+    const result = await executeAction(ctx.orgId, ctx.userId, actionId, { ...body });
 
     return NextResponse.json(result);
   } catch (error) {

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { createClient } from "@supabase/supabase-js";
 import { runCopilotAgent } from "@/lib/copilot/agent-service";
 import type { CopilotChatRequest, CopilotChatResponse } from "@/lib/copilot/types";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 
 // Initialize Supabase admin client
 function getSupabaseAdmin() {
@@ -14,8 +14,8 @@ function getSupabaseAdmin() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const ctx = await getCurrentUserOrg();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Check if GitHub token is configured
     if (!process.env.GITHUB_TOKEN) {
       // Fallback to rule-based responses if no API key
-      return NextResponse.json(await getFallbackResponse(message, context, orgId, userId));
+      return NextResponse.json(await getFallbackResponse(message, context, ctx.orgId, ctx.userId));
     }
 
     // Get user info for context
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
     const { data: member } = await supabase
       .from("org_members")
       .select("role")
-      .eq("organization_id", orgId)
-      .eq("user_id", userId)
+      .eq("organization_id", ctx.orgId)
+      .eq("user_id", ctx.userId)
       .single();
 
     // Get entity name if viewing a specific entity
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
           .from(table)
           .select(nameField)
           .eq("id", context.entityId)
-          .eq("organization_id", orgId)
+          .eq("organization_id", ctx.orgId)
           .single();
         entityName = data ? (data as Record<string, unknown>)[nameField] as string : undefined;
       }
@@ -65,8 +65,8 @@ export async function POST(request: NextRequest) {
 
     // Run the LLM agent
     const result = await runCopilotAgent(message, {
-      orgId,
-      userId,
+      orgId: ctx.orgId,
+      userId: ctx.userId,
       userName: member?.role || "User",
       currentPage: context.currentPage,
       entityType: context.entityType,

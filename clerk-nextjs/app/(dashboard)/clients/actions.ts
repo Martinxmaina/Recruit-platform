@@ -1,35 +1,20 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import type { ClientFormData } from "@/lib/validations/client";
 
 export async function getClients() {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	// Get organization_id from Supabase
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: clients, error } = await supabase
 		.from("clients")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	if (error) {
@@ -41,29 +26,15 @@ export async function getClients() {
 }
 
 export async function getClient(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return null;
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.select("*")
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (error) {
@@ -75,28 +46,14 @@ export async function getClient(id: string) {
 }
 
 export async function createClient(data: ClientFormData) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			name: data.name,
 			industry: data.industry || null,
 			status: data.status,
@@ -119,24 +76,10 @@ export async function createClient(data: ClientFormData) {
 }
 
 export async function updateClient(id: string, data: ClientFormData) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.update({
@@ -151,7 +94,7 @@ export async function updateClient(id: string, data: ClientFormData) {
 			updated_at: new Date().toISOString(),
 		})
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.select()
 		.single();
 
@@ -166,29 +109,15 @@ export async function updateClient(id: string, data: ClientFormData) {
 }
 
 export async function getClientJobs(clientId: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	if (!userId || !orgId) {
-		return [];
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: jobs, error } = await supabase
 		.from("jobs")
 		.select("*")
 		.eq("client_id", clientId)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	if (error) {
@@ -200,55 +129,37 @@ export async function getClientJobs(clientId: string) {
 }
 
 export async function getClientCandidates(clientId: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	if (!userId || !orgId) {
-		return [];
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
-	// Get job IDs for this client first
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: jobs } = await supabase
 		.from("jobs")
 		.select("id")
 		.eq("client_id", clientId)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!jobs || jobs.length === 0) {
 		return [];
 	}
 
 	const jobIds = jobs.map((j) => j.id);
-
-	// Get candidates through applications
 	const { data: applications } = await supabase
 		.from("applications")
 		.select("candidate_id")
 		.in("job_id", jobIds)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!applications || applications.length === 0) {
 		return [];
 	}
 
 	const candidateIds = [...new Set(applications.map((a) => a.candidate_id))];
-
 	const { data: candidates, error } = await supabase
 		.from("candidates")
 		.select("*")
 		.in("id", candidateIds)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error fetching client candidates:", error);
@@ -259,29 +170,14 @@ export async function getClientCandidates(clientId: string) {
 }
 
 export async function getClientActivity(clientId: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	if (!userId || !orgId) {
-		return [];
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
-	// Get notifications related to this client (through jobs)
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: notifications, error } = await supabase
 		.from("notifications")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.contains("metadata", { client_id: clientId })
 		.order("created_at", { ascending: false })
 		.limit(50);

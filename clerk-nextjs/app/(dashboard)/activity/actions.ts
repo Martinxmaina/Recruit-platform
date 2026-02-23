@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 
 export type ActivityLog = {
 	id: string;
@@ -24,22 +24,14 @@ export type ActivityLog = {
  * Get all activity for a specific candidate
  */
 export async function getCandidateActivity(candidateId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data, error } = await supabase
 		.from("activity_logs")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.eq("candidate_id", candidateId)
 		.order("created_at", { ascending: false })
 		.limit(100);
@@ -56,24 +48,15 @@ export async function getCandidateActivity(candidateId: string) {
  * Get activity for a specific job (through applications)
  */
 export async function getJobActivity(jobId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
-	// Get all applications for this job
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: applications } = await supabase
 		.from("applications")
 		.select("id, candidate_id")
 		.eq("job_id", jobId)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!applications || applications.length === 0) return [];
 
@@ -82,7 +65,7 @@ export async function getJobActivity(jobId: string) {
 	const { data, error } = await supabase
 		.from("activity_logs")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.in("entity_id", applicationIds)
 		.eq("entity_type", "application")
 		.order("created_at", { ascending: false })
@@ -100,23 +83,15 @@ export async function getJobActivity(jobId: string) {
  * Get activity for the currently logged-in user (worklog)
  */
 export async function getUserActivity(dateRange?: { start?: string; end?: string }) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	let query = supabase
 		.from("activity_logs")
 		.select("*")
-		.eq("organization_id", org.id)
-		.eq("user_id", userId)
+		.eq("organization_id", ctx.orgId)
+		.eq("user_id", ctx.userId)
 		.order("created_at", { ascending: false });
 
 	if (dateRange?.start) {

@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 
 // For now, conversations are stored in memory/client-side
 // In production, you'd store these in Supabase
 
 export async function GET() {
   try {
-    const { userId, orgId } = await auth();
-    if (!userId || !orgId) {
+    const ctx = await getCurrentUserOrg();
+    if (!ctx) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

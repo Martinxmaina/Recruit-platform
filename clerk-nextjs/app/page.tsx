@@ -1,10 +1,17 @@
 import Link from "next/link";
 import { HomeAuthBar } from "@/components/home-auth-bar";
+import { getCurrentUser } from "@/lib/auth/session";
 
-export default function Home() {
+export default async function Home() {
+	let user = null;
+	try {
+		user = await getCurrentUser();
+	} catch {
+		// Env missing or Supabase unreachable: show unauthenticated UI
+	}
 	return (
 		<div className="flex min-h-screen flex-col bg-background">
-			<HomeAuthBar />
+			<HomeAuthBar user={user ? { email: user.email ?? undefined } : null} />
 			<main className="flex flex-1 items-center justify-center">
 				<div className="flex max-w-3xl flex-col items-center gap-6 px-16 py-32 text-center sm:items-start sm:text-left">
 					<h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight">

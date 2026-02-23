@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -24,28 +24,14 @@ const DEFAULT_STAGES = [
 ];
 
 export async function getPipelineStages() {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: stages, error } = await supabase
 		.from("pipeline_stages")
 		.select("*")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("sort_order", { ascending: true });
 
 	if (error) {
@@ -53,9 +39,8 @@ export async function getPipelineStages() {
 		return [];
 	}
 
-	// If no stages exist, create default stages
 	if (!stages || stages.length === 0) {
-		return await ensureDefaultStages(userId, org.id);
+		return await ensureDefaultStages(ctx.userId, ctx.orgId);
 	}
 
 	return stages ?? [];
@@ -112,30 +97,15 @@ async function ensureDefaultStages(userId: string, orgId: string) {
 }
 
 export async function createPipelineStage(name: string, sort_order?: number) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// If sort_order not provided, add to end
+	const supabase = await createAdminClient(ctx.userId);
 	if (sort_order === undefined) {
 		const { data: lastStage } = await supabase
 			.from("pipeline_stages")
 			.select("sort_order")
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 			.order("sort_order", { ascending: false })
 			.limit(1)
 			.single();
@@ -146,7 +116,7 @@ export async function createPipelineStage(name: string, sort_order?: number) {
 	const { data: stage, error } = await supabase
 		.from("pipeline_stages")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			name: name.trim(),
 			sort_order,
 		})
@@ -166,24 +136,10 @@ export async function updatePipelineStage(
 	id: string,
 	data: { name?: string; sort_order?: number }
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const updateData: Record<string, unknown> = {};
 
 	if (data.name !== undefined) updateData.name = data.name.trim();
@@ -193,7 +149,7 @@ export async function updatePipelineStage(
 		.from("pipeline_stages")
 		.update(updateData)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.select()
 		.single();
 
@@ -207,41 +163,25 @@ export async function updatePipelineStage(
 }
 
 export async function deletePipelineStage(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Get the stage name before deleting
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: stage } = await supabase
 		.from("pipeline_stages")
 		.select("name")
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (!stage) {
 		return { error: "Stage not found" };
 	}
 
-	// Move all applications with this stage to "New" stage
 	const { data: newStage } = await supabase
 		.from("pipeline_stages")
 		.select("id")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.eq("name", "New")
 		.single();
 
@@ -249,16 +189,15 @@ export async function deletePipelineStage(id: string) {
 		await supabase
 			.from("applications")
 			.update({ stage: "New" })
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 			.eq("stage", stage.name);
 	}
 
-	// Delete the stage
 	const { error } = await supabase
 		.from("pipeline_stages")
 		.delete()
 		.eq("id", id)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error deleting pipeline stage:", error);
@@ -273,31 +212,16 @@ export async function deletePipelineStage(id: string) {
 export async function reorderPipelineStages(
 	stages: Array<{ id: string; sort_order: number }>
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Update each stage's sort_order
+	const supabase = await createAdminClient(ctx.userId);
 	const updates = stages.map((stage) =>
 		supabase
 			.from("pipeline_stages")
 			.update({ sort_order: stage.sort_order })
 			.eq("id", stage.id)
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 	);
 
 	const results = await Promise.all(updates);

@@ -44,6 +44,7 @@ function roleLabel(role: string): string {
 		"org:admin": "Admin",
 		"org:member": "Member",
 		admin: "Admin",
+		member: "Member",
 		basic_member: "Member",
 	};
 	return map[role] ?? role;
@@ -118,12 +119,14 @@ export function MembersList({ members }: MembersListProps) {
 														</AvatarFallback>
 													</Avatar>
 													<span className="font-medium text-sm">
-														{member.firstName} {member.lastName}
+														{member.firstName || member.lastName
+															? `${member.firstName} ${member.lastName}`.trim()
+															: member.email || member.id.slice(0, 8)}
 													</span>
 												</div>
 											</TableCell>
 											<TableCell className="text-muted-foreground text-sm">
-												{member.email}
+												{member.email || "—"}
 											</TableCell>
 											<TableCell>
 												<Select
@@ -135,8 +138,8 @@ export function MembersList({ members }: MembersListProps) {
 														<SelectValue />
 													</SelectTrigger>
 													<SelectContent>
-														<SelectItem value="org:admin">Admin</SelectItem>
-														<SelectItem value="org:member">Member</SelectItem>
+														<SelectItem value="admin">Admin</SelectItem>
+														<SelectItem value="member">Member</SelectItem>
 													</SelectContent>
 												</Select>
 											</TableCell>

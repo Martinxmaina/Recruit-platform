@@ -1,20 +1,17 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 import {
 	getCandidate,
 	updateCandidate,
 	deleteCandidate,
 } from "@/app/(dashboard)/candidates/actions";
-import { getOrgId, jsonResponse, errorResponse } from "@/lib/api/helpers";
+import { getCurrentUserOrg, jsonResponse, errorResponse } from "@/lib/api/helpers";
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: Params) {
 	const { id } = await params;
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return errorResponse("Unauthorized", 401);
-	const org = await getOrgId(userId, orgId);
-	if (!org) return errorResponse("Organization not found", 404);
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return errorResponse("Unauthorized", 401);
 
 	const candidate = await getCandidate(id);
 	if (!candidate) return errorResponse("Candidate not found", 404);
@@ -52,10 +49,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
 export async function DELETE(_request: NextRequest, { params }: Params) {
 	const { id } = await params;
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return errorResponse("Unauthorized", 401);
-	const org = await getOrgId(userId, orgId);
-	if (!org) return errorResponse("Organization not found", 404);
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return errorResponse("Unauthorized", 401);
 
 	const result = await deleteCandidate(id);
 	if (result?.error) return errorResponse(result.error, 400);

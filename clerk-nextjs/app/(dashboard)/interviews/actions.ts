@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
@@ -24,32 +24,17 @@ export async function getInterviews(filters?: {
 	status?: string;
 	upcoming?: boolean;
 }) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
-	// Get application IDs that match filters (if any)
+	const supabase = await createAdminClient(ctx.userId);
 	let applicationIds: string[] | null = null;
 
 	if (filters?.job_id || filters?.candidate_id) {
 		let appQuery = supabase
 			.from("applications")
 			.select("id")
-			.eq("organization_id", org.id);
+			.eq("organization_id", ctx.orgId);
 
 		if (filters?.job_id) {
 			appQuery = appQuery.eq("job_id", filters.job_id);
@@ -89,7 +74,7 @@ export async function getInterviews(filters?: {
 			)
 		`
 		)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	// Filter by application IDs if we have them
 	if (applicationIds) {
@@ -130,24 +115,10 @@ export async function getJobInterviews(jobId: string) {
 }
 
 export async function getInterview(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return null;
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: interview, error } = await supabase
 		.from("interviews")
 		.select(
@@ -168,7 +139,7 @@ export async function getInterview(id: string) {
 		`
 		)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (error) {
@@ -189,30 +160,15 @@ export async function createInterview(
 		interviewer_name?: string | null;
 	}
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
-	// Verify application exists and belongs to organization
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: application } = await supabase
 		.from("applications")
 		.select("id, job_id, candidate_id")
 		.eq("id", applicationId)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (!application) {
@@ -222,7 +178,7 @@ export async function createInterview(
 	const { data: interview, error } = await supabase
 		.from("interviews")
 		.insert({
-			organization_id: org.id,
+			organization_id: ctx.orgId,
 			application_id: applicationId,
 			scheduled_at: data.scheduled_at,
 			status: data.status || "scheduled",
@@ -255,24 +211,10 @@ export async function updateInterview(
 		interviewer_name?: string | null;
 	}
 ) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const updateData: Record<string, unknown> = {
 		updated_at: new Date().toISOString(),
 	};
@@ -289,7 +231,7 @@ export async function updateInterview(
 		.from("interviews")
 		.update(updateData)
 		.eq("id", id)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.select()
 		.single();
 
@@ -312,29 +254,15 @@ export async function updateInterviewStatus(id: string, status: string) {
 }
 
 export async function deleteInterview(id: string) {
-	const { userId, orgId } = await auth();
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
-
-	const supabase = await createAdminClient(userId);
-
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("interviews")
 		.delete()
 		.eq("id", id)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error deleting interview:", error);
@@ -349,22 +277,14 @@ export async function deleteInterview(id: string) {
  * Get organization members for interviewer selection
  */
 export async function getOrgMembers() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: members, error } = await supabase
 		.from("org_members")
 		.select("user_id, role")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: true });
 
 	if (error) {

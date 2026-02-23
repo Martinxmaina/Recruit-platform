@@ -3,10 +3,9 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/v1/clients/route";
 import { GET as GET_ONE, PATCH } from "@/app/api/v1/clients/[id]/route";
 
-vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/api/helpers", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@/lib/api/helpers")>();
-	return { ...actual, getOrgId: vi.fn() };
+	return { ...actual, getCurrentUserOrg: vi.fn() };
 });
 vi.mock("@/app/(dashboard)/clients/actions", () => ({
 	getClients: vi.fn(),
@@ -15,18 +14,19 @@ vi.mock("@/app/(dashboard)/clients/actions", () => ({
 	updateClient: vi.fn(),
 }));
 
-import { auth } from "@clerk/nextjs/server";
-import { getOrgId } from "@/lib/api/helpers";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { getClients, getClient, createClient, updateClient } from "@/app/(dashboard)/clients/actions";
 
 beforeEach(() => {
-	vi.mocked(auth).mockResolvedValue({ userId: "u1", orgId: "o1" } as any);
-	vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+	vi.mocked(getCurrentUserOrg).mockResolvedValue({
+		userId: "u1",
+		orgId: "org-uuid",
+	});
 });
 
 describe("GET /api/v1/clients", () => {
 	it("returns 401 when not authenticated", async () => {
-		vi.mocked(auth).mockResolvedValue({ userId: null, orgId: null } as any);
+		vi.mocked(getCurrentUserOrg).mockResolvedValue(null);
 		const res = await GET();
 		expect(res.status).toBe(401);
 	});

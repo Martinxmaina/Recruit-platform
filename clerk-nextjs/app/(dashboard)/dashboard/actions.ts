@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
@@ -46,43 +46,34 @@ function formatActivityTime(value: string | Date | null) {
 }
 
 export async function getDashboardStats() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) redirect("/dashboard");
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { activeJobs: 0, candidates: 0, interviewsThisWeek: 0, placements: 0 };
-
+	const supabase = await createAdminClient(ctx.userId);
 	const now = new Date();
 	const weekStart = getStartOfWeek(now).toISOString();
 	const weekEnd = getEndOfWeek(now).toISOString();
 
-	// Parallel queries
 	const [activeJobs, candidates, interviews, placements] = await Promise.all([
 		supabase
 			.from("jobs")
 			.select("*", { count: "exact", head: true })
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 			.eq("status", "open"),
 		supabase
 			.from("candidates")
 			.select("*", { count: "exact", head: true })
-			.eq("organization_id", org.id),
+			.eq("organization_id", ctx.orgId),
 		supabase
 			.from("interviews")
 			.select("*", { count: "exact", head: true })
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 			.gte("scheduled_at", weekStart)
 			.lte("scheduled_at", weekEnd),
 		supabase
 			.from("applications")
 			.select("*", { count: "exact", head: true })
-			.eq("organization_id", org.id)
+			.eq("organization_id", ctx.orgId)
 			.eq("status", "hired"),
 	]);
 
@@ -95,18 +86,10 @@ export async function getDashboardStats() {
 }
 
 export async function getUpcomingInterviews() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("interviews")
 		.select(`
@@ -118,7 +101,7 @@ export async function getUpcomingInterviews() {
 				jobs!inner (title)
 			)
 		`)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.gte("scheduled_at", new Date().toISOString())
 		.order("scheduled_at", { ascending: true })
 		.limit(5);
@@ -137,18 +120,10 @@ export async function getUpcomingInterviews() {
 }
 
 export async function getRecentActivity() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("applications")
 		.select(`
@@ -159,7 +134,7 @@ export async function getRecentActivity() {
 			candidates!inner (full_name),
 			jobs!inner (title)
 		`)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("updated_at", { ascending: false })
 		.limit(5);
 
@@ -172,24 +147,16 @@ export async function getRecentActivity() {
 }
 
 export async function getApplicationsOverTime() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const thirtyDaysAgo = subtractDays(new Date(), 30).toISOString();
 
 	const { data } = await supabase
 		.from("applications")
 		.select("applied_at")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.gte("applied_at", thirtyDaysAgo)
 		.order("applied_at", { ascending: true });
 
@@ -207,22 +174,14 @@ export async function getApplicationsOverTime() {
 }
 
 export async function getJobStatusDistribution() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("jobs")
 		.select("status")
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!data) return [];
 
@@ -238,32 +197,22 @@ export async function getJobStatusDistribution() {
  * Returns application counts per pipeline stage for funnel chart.
  */
 export async function getPipelineConversionMetrics() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
-	// Get pipeline stages for ordering
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: stages } = await supabase
 		.from("pipeline_stages")
 		.select("name, sort_order")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("sort_order", { ascending: true });
 
 	if (!stages || stages.length === 0) return [];
 
-	// Count applications per stage
 	const { data: apps } = await supabase
 		.from("applications")
 		.select("stage")
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!apps) return [];
 
@@ -282,23 +231,14 @@ export async function getPipelineConversionMetrics() {
  * Returns interview analytics: completion rate, avg time to hire, interviews by status.
  */
 export async function getInterviewAnalytics() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return { completionRate: 0, avgDaysToHire: 0, byStatus: [] };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { completionRate: 0, avgDaysToHire: 0, byStatus: [] };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { completionRate: 0, avgDaysToHire: 0, byStatus: [] };
-
-	// All interviews
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: interviews } = await supabase
 		.from("interviews")
 		.select("status, scheduled_at")
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (!interviews || interviews.length === 0) {
 		return { completionRate: 0, avgDaysToHire: 0, byStatus: [] };
@@ -315,11 +255,10 @@ export async function getInterviewAnalytics() {
 	}
 	const byStatus = Object.entries(statusCounts).map(([name, value]) => ({ name, value }));
 
-	// Avg days to hire (from hired applications)
 	const { data: hired } = await supabase
 		.from("applications")
 		.select("applied_at, updated_at")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.eq("status", "hired");
 
 	let avgDaysToHire = 0;
@@ -340,22 +279,14 @@ export async function getInterviewAnalytics() {
  * Returns all candidates as CSV-ready data.
  */
 export async function getCandidatesForExport() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("candidates")
 		.select("full_name, email, phone, location, current_title, source, created_at")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	return data ?? [];
@@ -365,22 +296,14 @@ export async function getCandidatesForExport() {
  * Returns all jobs as CSV-ready data.
  */
 export async function getJobsForExport() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("jobs")
 		.select("title, status, location, country, work_type, created_at, clients(name)")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	return (data ?? []).map((j: any) => ({

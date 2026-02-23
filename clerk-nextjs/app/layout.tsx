@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -20,21 +19,16 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<ClerkProvider
-			signInUrl="/sign-in"
-			signUpUrl="/sign-up"
-		>
-			<html lang="en">
-				<body className={`${fontSans.variable} font-sans antialiased`}>
-					<a
-						href="#main-content"
-						className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none"
-					>
-						Skip to main content
-					</a>
-					<TooltipProvider>{children}</TooltipProvider>
-				</body>
-			</html>
-		</ClerkProvider>
+		<html lang="en">
+			<body className={`${fontSans.variable} font-sans antialiased`}>
+				<a
+					href="#main-content"
+					className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none"
+				>
+					Skip to main content
+				</a>
+				<TooltipProvider>{children}</TooltipProvider>
+			</body>
+		</html>
 	);
 }

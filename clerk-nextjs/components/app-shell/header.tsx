@@ -21,16 +21,17 @@ import type { Notification } from "@/app/(dashboard)/notifications/actions";
 interface HeaderProps {
 	notifications?: Notification[];
 	unreadCount?: number;
+	userEmail?: string;
 }
 
-export function Header({ notifications = [], unreadCount = 0 }: HeaderProps) {
+export function Header({ notifications = [], unreadCount = 0, userEmail }: HeaderProps) {
 	const [open, setOpen] = useState(false);
 
 	return (
 		<>
 			<header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:px-8" role="banner">
 				<div className="flex max-w-xl flex-1 items-center gap-4">
-					<MobileSidebar />
+					<MobileSidebar userEmail={userEmail} />
 					<Button
 						variant="ghost"
 						size="icon"

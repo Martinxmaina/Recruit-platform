@@ -1,4 +1,3 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { OrgProfile } from "@/components/settings/org-profile";
 import { MembersList } from "@/components/settings/members-list";
@@ -7,62 +6,31 @@ import { GoogleCalendarSettings } from "./google-calendar";
 import { getAuthUrl } from "@/lib/google/calendar";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { Separator } from "@/components/ui/separator";
+import { getCurrentUser, getCurrentOrg } from "@/lib/auth/session";
+import { getMembers } from "./actions";
 
 export default async function SettingsPage() {
-	const { userId, orgId } = await auth();
+	const user = await getCurrentUser();
+	const org = await getCurrentOrg();
+	if (!user || !org) redirect("/dashboard");
 
-	if (!userId || !orgId) {
-		redirect("/dashboard");
-	}
+	const members = await getMembers();
 
-	const client = await clerkClient();
-
-	// Fetch organization details
-	const org = await client.organizations.getOrganization({
-		organizationId: orgId,
-	});
-
-	// Fetch current members
-	const membershipsResponse =
-		await client.organizations.getOrganizationMembershipList({
-			organizationId: orgId,
-			limit: 100,
-		});
-
-	const members = membershipsResponse.data.map((m) => ({
-		id: m.publicUserData?.userId ?? m.id,
-		firstName: m.publicUserData?.firstName ?? "",
-		lastName: m.publicUserData?.lastName ?? "",
-		email: m.publicUserData?.identifier ?? "",
-		imageUrl: m.publicUserData?.imageUrl ?? "",
-		role: m.role,
-		createdAt: m.createdAt,
-	}));
-
-	// Check Google Calendar connection
 	let gcalConnected = false;
 	try {
-		const supabase = await createAdminClient(userId);
-		const { data: supaOrg } = await supabase
-			.from("organizations")
-			.select("id")
-			.eq("clerk_org_id", orgId)
+		const supabase = await createAdminClient(user.id);
+		const { data: member } = await supabase
+			.from("org_members")
+			.select("google_calendar_token")
+			.eq("organization_id", org.id)
+			.eq("user_id", user.id)
 			.single();
-
-		if (supaOrg) {
-			const { data: member } = await supabase
-				.from("org_members")
-				.select("google_calendar_token")
-				.eq("organization_id", supaOrg.id)
-				.eq("user_id", userId)
-				.single();
-			gcalConnected = !!member?.google_calendar_token;
-		}
+		gcalConnected = !!member?.google_calendar_token;
 	} catch {
 		// Ignore
 	}
 
-	const gcalAuthUrl = getAuthUrl(orgId);
+	const gcalAuthUrl = getAuthUrl(org.id);
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-8">
@@ -75,9 +43,9 @@ export default async function SettingsPage() {
 
 			<OrgProfile
 				name={org.name}
-				imageUrl={org.imageUrl}
-				slug={org.slug ?? ""}
-				createdAt={org.createdAt}
+				imageUrl={null}
+				slug=""
+				createdAt={0}
 			/>
 
 			<Separator />
@@ -86,7 +54,7 @@ export default async function SettingsPage() {
 
 			<Separator />
 
-			<InviteForm orgId={orgId} />
+			<InviteForm orgId={org.id} />
 
 			<Separator />
 

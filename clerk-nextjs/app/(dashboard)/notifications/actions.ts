@@ -1,6 +1,6 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
@@ -18,23 +18,15 @@ export type Notification = {
 };
 
 export async function getNotifications(limit = 20) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("notifications")
 		.select("*")
-		.eq("organization_id", org.id)
-		.eq("user_id", userId)
+		.eq("organization_id", ctx.orgId)
+		.eq("user_id", ctx.userId)
 		.order("created_at", { ascending: false })
 		.limit(limit);
 
@@ -42,39 +34,30 @@ export async function getNotifications(limit = 20) {
 }
 
 export async function getUnreadCount() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return 0;
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return 0;
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return 0;
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { count } = await supabase
 		.from("notifications")
 		.select("*", { count: "exact", head: true })
-		.eq("organization_id", org.id)
-		.eq("user_id", userId)
+		.eq("organization_id", ctx.orgId)
+		.eq("user_id", ctx.userId)
 		.is("read_at", null);
 
 	return count ?? 0;
 }
 
 export async function markAsRead(notificationId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return { error: "Unauthorized" };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("notifications")
 		.update({ read_at: new Date().toISOString() })
 		.eq("id", notificationId)
-		.eq("user_id", userId);
+		.eq("user_id", ctx.userId);
 
 	if (error) return { error: error.message };
 
@@ -83,23 +66,15 @@ export async function markAsRead(notificationId: string) {
 }
 
 export async function markAllAsRead() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return { error: "Unauthorized" };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { error: "Organization not found" };
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("notifications")
 		.update({ read_at: new Date().toISOString() })
-		.eq("organization_id", org.id)
-		.eq("user_id", userId)
+		.eq("organization_id", ctx.orgId)
+		.eq("user_id", ctx.userId)
 		.is("read_at", null);
 
 	if (error) return { error: error.message };
@@ -116,20 +91,12 @@ export async function createNotification(data: {
 	link?: string;
 	metadata?: Record<string, unknown>;
 }) {
-	const { userId: currentUserId, orgId } = await auth();
-	if (!currentUserId || !orgId) return { error: "Unauthorized" };
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(currentUserId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return { error: "Organization not found" };
-
-	const insertData: any = {
-		organization_id: org.id,
+	const supabase = await createAdminClient(ctx.userId);
+	const insertData: Record<string, unknown> = {
+		organization_id: ctx.orgId,
 		user_id: data.userId,
 		type: data.type,
 		title: data.title,

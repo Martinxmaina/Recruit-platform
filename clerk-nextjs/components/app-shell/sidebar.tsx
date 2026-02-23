@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import {
 	LayoutDashboard,
 	Users,
@@ -15,11 +14,13 @@ import {
 	Globe,
 	GitBranch,
 	BookmarkCheck,
+	LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClerkClientOnly } from "./clerk-client-only";
+import { Button } from "@/components/ui/button";
+import { signOut } from "@/app/(auth)/actions";
 
 const allNavItems = [
 	{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["admin", "recruiter"] },
@@ -37,9 +38,10 @@ const allNavItems = [
 interface SidebarProps {
 	className?: string;
 	role?: string;
+	userEmail?: string;
 }
 
-export function Sidebar({ className, role = "recruiter" }: SidebarProps) {
+export function Sidebar({ className, role = "recruiter", userEmail }: SidebarProps) {
 	const pathname = usePathname();
 	const navItems = allNavItems.filter((item) => item.roles.includes(role));
 
@@ -55,19 +57,6 @@ export function Sidebar({ className, role = "recruiter" }: SidebarProps) {
 						Multi-tenant
 					</p>
 				</div>
-			</div>
-			<div className="px-4 pb-2">
-				<OrganizationSwitcher
-					afterCreateOrganizationUrl="/dashboard"
-					afterSelectOrganizationUrl="/dashboard"
-					appearance={{
-						elements: {
-							rootBox: "w-full",
-							organizationSwitcherTrigger:
-								"w-full justify-between rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted transition-colors",
-						},
-					}}
-				/>
 			</div>
 			<ScrollArea className="flex-1 px-4">
 				<nav className="space-y-1 py-2" aria-label="Navigation menu">
@@ -96,16 +85,16 @@ export function Sidebar({ className, role = "recruiter" }: SidebarProps) {
 				</nav>
 			</ScrollArea>
 			<div className="border-t border-border p-4">
-				<ClerkClientOnly>
-					<UserButton
-						afterSignOutUrl="/"
-						appearance={{
-							elements: {
-								avatarBox: "size-8",
-							},
-						}}
-					/>
-				</ClerkClientOnly>
+				<div className="flex items-center gap-3 rounded-lg px-2 py-2">
+					<span className="truncate text-sm text-muted-foreground" title={userEmail}>
+						{userEmail ?? "User"}
+					</span>
+					<form action={signOut} className="ml-auto">
+						<Button type="submit" variant="ghost" size="icon" className="size-8" aria-label="Sign out">
+							<LogOut className="size-4" />
+						</Button>
+					</form>
+				</div>
 			</div>
 		</aside>
 	);

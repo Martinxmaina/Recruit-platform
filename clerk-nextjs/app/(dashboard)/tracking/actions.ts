@@ -1,26 +1,14 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { revalidatePath } from "next/cache";
 
 export async function getTrackedCandidates() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
-		return [];
-	}
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return [];
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data, error } = await supabase
 		.from("tracked_candidates")
 		.select(
@@ -34,7 +22,7 @@ export async function getTrackedCandidates() {
 			)
 		`
 		)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	if (error) {
@@ -46,53 +34,29 @@ export async function getTrackedCandidates() {
 }
 
 export async function isCandidateTracked(candidateId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
-		return false;
-	}
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return false;
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return false;
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { count } = await supabase
 		.from("tracked_candidates")
 		.select("id", { count: "exact", head: true })
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.eq("candidate_id", candidateId);
 
 	return (count ?? 0) > 0;
 }
 
 export async function addToTracking(candidateId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: candidate } = await supabase
 		.from("candidates")
 		.select("id, linkedin_url")
 		.eq("id", candidateId)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.single();
 
 	if (!candidate) {
@@ -100,10 +64,10 @@ export async function addToTracking(candidateId: string) {
 	}
 
 	const { error } = await supabase.from("tracked_candidates").insert({
-		organization_id: org.id,
+		organization_id: ctx.orgId,
 		candidate_id: candidate.id,
 		linkedin_url: candidate.linkedin_url,
-		added_by_user_id: userId,
+		added_by_user_id: ctx.userId,
 	});
 
 	if (error) {
@@ -120,27 +84,15 @@ export async function addToTracking(candidateId: string) {
 }
 
 export async function removeFromTracking(trackedId: string) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("tracked_candidates")
 		.delete()
 		.eq("id", trackedId)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error removing tracked candidate:", error);
@@ -155,22 +107,10 @@ export async function updateTrackedCandidate(
 	trackedId: string,
 	data: { linkedin_url?: string | null; notes?: string | null }
 ) {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) {
-		return { error: "Unauthorized" };
-	}
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) {
-		return { error: "Organization not found" };
-	}
-
+	const supabase = await createAdminClient(ctx.userId);
 	const { error } = await supabase
 		.from("tracked_candidates")
 		.update({
@@ -179,7 +119,7 @@ export async function updateTrackedCandidate(
 			updated_at: new Date().toISOString(),
 		})
 		.eq("id", trackedId)
-		.eq("organization_id", org.id);
+		.eq("organization_id", ctx.orgId);
 
 	if (error) {
 		console.error("Error updating tracked candidate:", error);

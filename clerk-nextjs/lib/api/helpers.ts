@@ -1,21 +1,18 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUser, getCurrentOrg } from "@/lib/auth/session";
 import { NextResponse } from "next/server";
 
 /**
- * Resolves Clerk org ID to Supabase organization UUID.
- * Returns org.id or null if not found.
+ * Returns current Supabase user id and DB organization id for API routes and server actions.
+ * Use this instead of auth() + getOrgId when you need userId and orgId.
  */
-export async function getOrgId(
-	userId: string,
-	orgId: string
-): Promise<{ id: string } | null> {
-	const supabase = await createAdminClient(userId);
-	const { data } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-	return data ?? null;
+export async function getCurrentUserOrg(): Promise<{
+	userId: string;
+	orgId: string;
+} | null> {
+	const user = await getCurrentUser();
+	const org = await getCurrentOrg();
+	if (!user || !org) return null;
+	return { userId: user.id, orgId: org.id };
 }
 
 export function jsonResponse(

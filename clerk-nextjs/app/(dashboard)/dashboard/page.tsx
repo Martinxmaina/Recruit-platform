@@ -1,4 +1,4 @@
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/session";
 import { StatsCards } from "@/components/dashboard/stats-cards";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { UpcomingInterviews } from "@/components/dashboard/upcoming-interviews";
@@ -28,9 +28,11 @@ const EMPTY_INTERVIEW_ANALYTICS = {
 };
 
 export default async function DashboardPage() {
-	const { sessionClaims } = await auth();
-	const firstName = sessionClaims?.firstName as string | undefined;
-	const displayName = firstName ?? "there";
+	const user = await getCurrentUser();
+	const displayName =
+		(user?.user_metadata?.full_name as string) ??
+		user?.email?.split("@")[0] ??
+		"there";
 
 	const supabaseConfigured =
 		!!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;

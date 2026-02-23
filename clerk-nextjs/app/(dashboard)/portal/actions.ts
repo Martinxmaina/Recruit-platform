@@ -1,39 +1,20 @@
 "use server";
 
-import { auth } from "@clerk/nextjs/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 
 /**
  * Get jobs associated with the current client user's organization.
- * For client role: shows only jobs linked to the client record
- * associated with the user.
  */
 export async function getPortalJobs() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
-	// Find which client record belongs to this user (if any)
-	const { data: member } = await supabase
-		.from("org_members")
-		.select("user_id")
-		.eq("organization_id", org.id)
-		.eq("user_id", userId)
-		.single();
-
-	// Get all jobs for the org (clients can see all org jobs they're assigned to)
+	const supabase = await createAdminClient(ctx.userId);
 	const { data: jobs } = await supabase
 		.from("jobs")
 		.select("id, title, status, location, work_type, created_at, clients(name)")
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.order("created_at", { ascending: false });
 
 	return (jobs ?? []).map((j: any) => ({
@@ -52,19 +33,10 @@ export async function getPortalJobs() {
  * for the client portal.
  */
 export async function getPortalShortlist() {
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return [];
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
 
-	const supabase = await createAdminClient(userId);
-	const { data: org } = await supabase
-		.from("organizations")
-		.select("id")
-		.eq("clerk_org_id", orgId)
-		.single();
-
-	if (!org) return [];
-
-	// Get applications in "interview" or later stages
+	const supabase = await createAdminClient(ctx.userId);
 	const { data } = await supabase
 		.from("applications")
 		.select(`
@@ -75,7 +47,7 @@ export async function getPortalShortlist() {
 			candidates!inner(full_name, email, current_title),
 			jobs!inner(title)
 		`)
-		.eq("organization_id", org.id)
+		.eq("organization_id", ctx.orgId)
 		.not("stage", "eq", "applied")
 		.order("updated_at", { ascending: false })
 		.limit(50);

@@ -27,11 +27,14 @@ function getServiceClient(): ReturnType<typeof createClient<Database>> | null {
 const SUPABASE_ENV_MSG =
 	"Supabase env missing. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to .env.local in the app directory (e.g. clerk-nextjs/.env.local when running from clerk-nextjs).";
 
-export async function ensureOrgInSupabase(
-	clerkOrgId: string,
-	orgName: string,
-	userId: string,
-	role: string = "admin"
+/**
+ * Ensures the Supabase user has at least one organization.
+ * If no org_members row exists, creates a default org and adds the user as admin.
+ * Returns the organization id (existing or newly created).
+ */
+export async function ensureUserHasOrg(
+	supabaseUserId: string,
+	email?: string
 ): Promise<string | null> {
 	const supabase = getServiceClient();
 	if (!supabase) {
@@ -39,36 +42,36 @@ export async function ensureOrgInSupabase(
 		return null;
 	}
 
-	// 1. Upsert the organization (insert if clerk_org_id doesn't exist yet)
+	const { data: existing } = await supabase
+		.from("org_members")
+		.select("organization_id")
+		.eq("user_id", supabaseUserId)
+		.limit(1)
+		.maybeSingle();
+
+	if (existing) return existing.organization_id;
+
+	const orgName = email ? `${email.split("@")[0]}'s Organization` : "My Organization";
 	const { data: org, error: orgError } = await supabase
 		.from("organizations")
-		.upsert(
-			{ clerk_org_id: clerkOrgId, name: orgName },
-			{ onConflict: "clerk_org_id" }
-		)
+		.insert({ name: orgName, clerk_org_id: null })
 		.select("id")
 		.single();
 
 	if (orgError) {
-		console.error("Failed to upsert organization:", orgError.message);
-		throw new Error(`Org sync failed: ${orgError.message}`);
+		console.error("Failed to create organization:", orgError.message);
+		throw new Error(`Org creation failed: ${orgError.message}`);
 	}
 
-	// 2. Upsert the org member (insert if user_id + organization_id pair doesn't exist)
-	const { error: memberError } = await supabase
-		.from("org_members")
-		.upsert(
-			{
-				organization_id: org.id,
-				user_id: userId,
-				role,
-			},
-			{ onConflict: "organization_id,user_id" }
-		);
+	const { error: memberError } = await supabase.from("org_members").insert({
+		organization_id: org.id,
+		user_id: supabaseUserId,
+		role: "admin",
+	});
 
 	if (memberError) {
-		console.error("Failed to upsert org member:", memberError.message);
-		throw new Error(`Org member sync failed: ${memberError.message}`);
+		console.error("Failed to add org member:", memberError.message);
+		throw new Error(`Org member creation failed: ${memberError.message}`);
 	}
 
 	return org.id;

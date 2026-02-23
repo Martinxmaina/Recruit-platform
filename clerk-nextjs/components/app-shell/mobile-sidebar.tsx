@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { UserButton, OrganizationSwitcher } from "@clerk/nextjs";
 import {
 	LayoutDashboard,
 	Users,
@@ -13,6 +12,7 @@ import {
 	Settings,
 	Layers,
 	Menu,
+	LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import {
 	SheetTrigger,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ClerkClientOnly } from "./clerk-client-only";
+import { signOut } from "@/app/(auth)/actions";
 
 const navItems = [
 	{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -35,7 +35,11 @@ const navItems = [
 	{ href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 
-export function MobileSidebar() {
+interface MobileSidebarProps {
+	userEmail?: string;
+}
+
+export function MobileSidebar({ userEmail }: MobileSidebarProps) {
 	const [open, setOpen] = useState(false);
 	const pathname = usePathname();
 
@@ -60,19 +64,6 @@ export function MobileSidebar() {
 						</div>
 					</SheetTitle>
 				</SheetHeader>
-				<div className="px-4 pb-2">
-					<OrganizationSwitcher
-						afterCreateOrganizationUrl="/dashboard"
-						afterSelectOrganizationUrl="/dashboard"
-						appearance={{
-							elements: {
-								rootBox: "w-full",
-								organizationSwitcherTrigger:
-									"w-full justify-between rounded-lg border border-border px-3 py-2 text-sm hover:bg-muted transition-colors",
-							},
-						}}
-					/>
-				</div>
 				<ScrollArea className="flex-1 px-4">
 					<nav className="space-y-1 py-2">
 						{navItems.map(({ href, label, icon: Icon }) => {
@@ -97,16 +88,16 @@ export function MobileSidebar() {
 					</nav>
 				</ScrollArea>
 				<div className="border-t border-border p-4">
-					<ClerkClientOnly>
-						<UserButton
-							afterSignOutUrl="/"
-							appearance={{
-								elements: {
-									avatarBox: "size-8",
-								},
-							}}
-						/>
-					</ClerkClientOnly>
+					<div className="flex items-center gap-3 rounded-lg px-2 py-2">
+						<span className="truncate text-sm text-muted-foreground" title={userEmail}>
+							{userEmail ?? "User"}
+						</span>
+						<form action={signOut} className="ml-auto">
+							<Button type="submit" variant="ghost" size="icon" className="size-8" aria-label="Sign out">
+								<LogOut className="size-4" />
+							</Button>
+						</form>
+					</div>
 				</div>
 			</SheetContent>
 		</Sheet>

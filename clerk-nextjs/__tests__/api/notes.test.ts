@@ -3,10 +3,9 @@ import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/v1/notes/route";
 import { DELETE } from "@/app/api/v1/notes/[id]/route";
 
-vi.mock("@clerk/nextjs/server", () => ({ auth: vi.fn() }));
 vi.mock("@/lib/api/helpers", async (importOriginal) => {
 	const actual = await importOriginal<typeof import("@/lib/api/helpers")>();
-	return { ...actual, getOrgId: vi.fn() };
+	return { ...actual, getCurrentUserOrg: vi.fn() };
 });
 vi.mock("@/app/(dashboard)/notes/actions", () => ({
 	getNotes: vi.fn(),
@@ -14,13 +13,14 @@ vi.mock("@/app/(dashboard)/notes/actions", () => ({
 	deleteNote: vi.fn(),
 }));
 
-import { auth } from "@clerk/nextjs/server";
-import { getOrgId } from "@/lib/api/helpers";
+import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { getNotes, createNote, deleteNote } from "@/app/(dashboard)/notes/actions";
 
 beforeEach(() => {
-	vi.mocked(auth).mockResolvedValue({ userId: "u1", orgId: "o1" } as any);
-	vi.mocked(getOrgId).mockResolvedValue({ id: "org-uuid" });
+	vi.mocked(getCurrentUserOrg).mockResolvedValue({
+		userId: "u1",
+		orgId: "org-uuid",
+	});
 });
 
 describe("GET /api/v1/notes", () => {
