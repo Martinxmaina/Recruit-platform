@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
+import { DB_ROLE_ADMIN } from "@/lib/roles";
 
 /**
  * Returns a service-role Supabase client that bypasses RLS.
@@ -56,7 +57,7 @@ export async function ensureUserHasOrg(
 	const { error: memberError } = await supabase.from("org_members").insert({
 		organization_id: org.id,
 		user_id: supabaseUserId,
-		role: "admin",
+		role: DB_ROLE_ADMIN,
 	});
 
 	if (memberError) {

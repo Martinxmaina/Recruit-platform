@@ -11,7 +11,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -24,36 +23,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Users, Trash2 } from "lucide-react";
 import { formatDate } from "@/lib/utils/date";
-import { updateMemberRole, removeMember } from "@/app/(dashboard)/settings/actions";
-
-interface Member {
-	id: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	imageUrl: string | null;
-	role: string;
-	createdAt: number;
-}
+import {
+	updateMemberRole,
+	removeMember,
+	type SettingsMember,
+} from "@/app/(dashboard)/settings/actions";
 
 interface MembersListProps {
-	members: Member[];
-}
-
-function roleLabel(role: string): string {
-	const map: Record<string, string> = {
-		"org:admin": "Admin",
-		"org:member": "Member",
-		admin: "Admin",
-		member: "Member",
-		basic_member: "Member",
-	};
-	return map[role] ?? role;
-}
-
-function roleVariant(role: string): "default" | "secondary" | "outline" {
-	if (role.includes("admin")) return "default";
-	return "secondary";
+	members: SettingsMember[];
 }
 
 export function MembersList({ members }: MembersListProps) {
@@ -145,13 +122,16 @@ export function MembersList({ members }: MembersListProps) {
 												</Select>
 											</TableCell>
 											<TableCell className="text-muted-foreground text-sm">
-												{formatDate(member.createdAt)}
+												{member.createdAt
+													? formatDate(member.createdAt)
+													: "—"}
 											</TableCell>
 											<TableCell>
 												<Button
 													variant="ghost"
 													size="icon"
 													className="size-7 text-muted-foreground hover:text-destructive"
+													aria-label="Remove member"
 													onClick={() => handleRemove(member.id)}
 													disabled={isPending}
 												>

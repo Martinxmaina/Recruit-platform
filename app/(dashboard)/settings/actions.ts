@@ -3,6 +3,7 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { revalidatePath } from "next/cache";
+import { toDbRole, toUiRole, isAdminDbRole } from "@/lib/roles";
 
 interface InviteResult {
 	success: boolean;
@@ -47,9 +48,10 @@ export async function updateMemberRole(membershipId: string, newRole: string) {
 	if (!validRoles.includes(newRole)) return { error: "Invalid role" };
 
 	const supabase = await createAdminClient(ctx.userId);
+	const dbRole = toDbRole(newRole);
 	const { error } = await supabase
 		.from("org_members")
-		.update({ role: newRole })
+		.update({ role: dbRole })
 		.eq("organization_id", ctx.orgId)
 		.eq("user_id", membershipId);
 
@@ -76,7 +78,7 @@ export async function removeMember(memberUserId: string) {
 		.select("user_id, role")
 		.eq("organization_id", ctx.orgId);
 
-	const admins = members?.filter((m) => m.role === "admin") ?? [];
+	const admins = members?.filter((m) => isAdminDbRole(m.role)) ?? [];
 	if (memberUserId === ctx.userId && admins.length <= 1) {
 		return { error: "Cannot remove the last admin." };
 	}
@@ -131,7 +133,7 @@ export async function getMembers(): Promise<SettingsMember[]> {
 		lastName: "",
 		email: "",
 		imageUrl: null,
-		role: m.role ?? "member",
+		role: toUiRole(m.role),
 		createdAt: m.created_at ? new Date(m.created_at).getTime() : 0,
 	}));
 }
