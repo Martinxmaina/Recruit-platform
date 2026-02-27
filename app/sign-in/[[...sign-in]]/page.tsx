@@ -5,8 +5,7 @@ export default function SignInPage() {
 				This app now uses Supabase authentication only.
 			</p>
 			<p className="text-muted-foreground text-center">
-				Run the main dashboard from the <code className="rounded bg-gray-100 px-1 py-0.5">clerk-nextjs</code>{' '}
-				app and open <code className="rounded bg-gray-100 px-1 py-0.5">/sign-in</code> there.
+				Run <code className="rounded bg-gray-100 px-1 py-0.5">npm run dev</code> from the repository root and use this route for sign in.
 			</p>
 		</div>
 	)
