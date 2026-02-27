@@ -20,10 +20,8 @@ export async function GET(_request: NextRequest, { params }: Params) {
 
 export async function PATCH(request: NextRequest, { params }: Params) {
 	const { id } = await params;
-	const { userId, orgId } = await auth();
-	if (!userId || !orgId) return errorResponse("Unauthorized", 401);
-	const org = await getOrgId(userId, orgId);
-	if (!org) return errorResponse("Organization not found", 404);
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return errorResponse("Unauthorized", 401);
 
 	let body: Record<string, unknown>;
 	try {

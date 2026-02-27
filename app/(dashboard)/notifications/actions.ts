@@ -95,16 +95,15 @@ export async function createNotification(data: {
 	if (!ctx) return { error: "Unauthorized" };
 
 	const supabase = await createAdminClient(ctx.userId);
-	const insertData: Record<string, unknown> = {
+	const { error } = await supabase.from("notifications").insert({
 		organization_id: ctx.orgId,
 		user_id: data.userId,
 		type: data.type,
 		title: data.title,
 		message: data.message ?? null,
 		link: data.link ?? null,
-		metadata: data.metadata ?? {},
-	};
-	const { error } = await supabase.from("notifications").insert(insertData);
+		metadata: (data.metadata ?? {}) as import("@/lib/supabase/types").Json,
+	});
 
 	if (error) return { error: error.message };
 	return { success: true };
