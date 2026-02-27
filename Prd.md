@@ -27,11 +27,11 @@ System Administrators: Organization owners with full access
                   │                           │
                   ▼                           ▼
          ┌────────────────┐         ┌─────────────────┐
-         │  Clerk Auth    │         │   Supabase      │
+         │ Supabase Auth  │         │   Supabase      │
          │  - SSO         │         │   - PostgreSQL  │
-         │  - MFA         │         │   - Real-time   │
-         │  - Sessions    │         │   - Storage     │
-         └────────────────┘         └────────┬────────┘
+         │  - Sessions    │         │   - Real-time   │
+         │  - MFA (via    │         │   - Storage     │
+         │    providers)  │         └────────┬────────┘
                                              │
                                              │
                   ┌──────────────────────────┴────────┐
@@ -46,15 +46,15 @@ System Administrators: Organization owners with full access
 2.2 Multi-tenancy Model
 
 Database Level: Row-level security (RLS) using organization_id
-Application Level: Clerk organizations for user management
+Application Level: Supabase organizations for user management
 Data Isolation: Complete separation of data between organizations
 
 2.3 Authentication Flow
 
 User receives email invitation with organization context
-User signs up via Clerk with invite token
-Clerk creates user and associates with organization
-Supabase RLS policies enforce data access based on organization
+User signs up via Supabase auth with invite token
+Supabase creates user and associates with organization
+RLS policies enforce data access based on organization
 
 
 3. User Roles & Permissions
@@ -91,11 +91,11 @@ System Administrators: Organization owners with full access
                   │                           │
                   ▼                           ▼
          ┌────────────────┐         ┌─────────────────┐
-         │  Clerk Auth    │         │   Supabase      │
+         │ Supabase Auth  │         │   Supabase      │
          │  - SSO         │         │   - PostgreSQL  │
-         │  - MFA         │         │   - Real-time   │
-         │  - Sessions    │         │   - Storage     │
-         └────────────────┘         └────────┬────────┘
+         │  - Sessions    │         │   - Real-time   │
+         │  - MFA (via    │         │   - Storage     │
+         │    providers)  │         └────────┬────────┘
                                              │
                                              │
                   ┌──────────────────────────┴────────┐
@@ -110,15 +110,15 @@ System Administrators: Organization owners with full access
 2.2 Multi-tenancy Model
 
 Database Level: Row-level security (RLS) using organization_id
-Application Level: Clerk organizations for user management
+Application Level: Supabase organizations for user management
 Data Isolation: Complete separation of data between organizations
 
 2.3 Authentication Flow
 
 User receives email invitation with organization context
-User signs up via Clerk with invite token
-Clerk creates user and associates with organization
-Supabase RLS policies enforce data access based on organization
+User signs up via Supabase auth with invite token
+Supabase creates user and associates with organization
+RLS policies enforce data access based on organization
 
 
 3. User Roles & Permissions
@@ -626,7 +626,7 @@ FeatureAdminRecruiterClientOrganization ManagementInvite/Remove Users✅❌❌Ed
 
 **Base URL**: `/api/v1`
 
-**Authentication**: All endpoints require Clerk JWT in `Authorization: Bearer <token>` header
+**Authentication**: All endpoints require a valid Supabase-authenticated session (for example, cookie or bearer token)
 
 **Standard Response Format**:
 ```json
@@ -1245,7 +1245,7 @@ await createNotification({
 - **ORM**: Supabase JS Client
 - **File Storage**: Supabase Storage (for resumes, logos)
 - **Real-time**: Supabase Realtime
-- **Authentication**: Clerk
+- **Authentication**: Supabase Auth
 - **API Security**: API key validation, rate limiting (Upstash)
 - **Logging**: Axiom or Better Stack
 
@@ -1275,7 +1275,7 @@ await createNotification({
 - [ ] Supabase project setup
 - [ ] Database schema creation
 - [ ] RLS policies implementation
-- [ ] Clerk integration
+- [ ] Supabase auth integration
 - [ ] Basic layout (header, sidebar, navigation)
 - [ ] Authentication flows (login, signup, invite)
 

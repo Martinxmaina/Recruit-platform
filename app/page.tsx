@@ -1,17 +1,14 @@
-import Link from 'next/link'
-
 export default function Home() {
-	const appUrl = process.env.NEXT_PUBLIC_APP_URL
-	const dashboardHref = appUrl ? `${appUrl.replace(/\/$/, '')}/dashboard` : '/dashboard'
 	return (
 		<main className="min-h-screen p-8">
 			<h1 className="text-2xl font-semibold">Recruitment Platform</h1>
-			<p className="mt-2 text-gray-600">Welcome. Sign in or sign up using the header.</p>
-			<p className="mt-4">
-				<Link href={dashboardHref} className="text-blue-600 underline">
-					Dashboard
-				</Link>{' '}
-				(protected; requires sign-in).
+			<p className="mt-2 text-gray-600">
+				The main dashboard now lives in the <code className="rounded bg-gray-100 px-1 py-0.5">clerk-nextjs</code> app.
+			</p>
+			<p className="mt-4 text-gray-600">
+				Run <code className="rounded bg-gray-100 px-1 py-0.5">npm run dev</code> inside{' '}
+				<code className="rounded bg-gray-100 px-1 py-0.5">clerk-nextjs</code> and open{' '}
+				<code className="rounded bg-gray-100 px-1 py-0.5">/dashboard</code> there.
 			</p>
 		</main>
 	)

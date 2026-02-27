@@ -6,7 +6,7 @@ Use these curl commands to create candidates through the API. They are written s
 
 ## 1. Get your session cookie
 
-You must be signed in to the app (Clerk). Then:
+You must be signed in to the app. Then:
 
 1. Open the app in the browser (e.g. `http://localhost:3000`) and sign in.
 2. Open DevTools → **Application** (Chrome) or **Storage** (Firefox) → **Cookies** → your origin.
@@ -152,6 +152,6 @@ All optional fields are stored in the database when you send them; omitting them
 | Response | Meaning |
 |----------|--------|
 | **401 Unauthorized** | Missing or invalid session. Sign in again and copy a fresh `__session` cookie. |
-| **404 Organization not found** | Your Clerk org has no matching row in `organizations`. Ensure org sync (e.g. sign-in/sync) has run. |
+| **404 Organization not found** | Your organization has no matching row in `organizations`. Ensure org sync (e.g. sign-in/sync) has run. |
 | **400** with `"error": "full_name is required"` | Request body must be JSON and include `"full_name": "Some Name"`. |
 | **201** + JSON object | Candidate was inserted. Use GET list or GET by `id` to confirm it reflects in the database. |

@@ -10,28 +10,13 @@ function getSupabaseAdmin() {
   );
 }
 
-// Get Supabase org UUID from Clerk org ID
-async function getSupabaseOrgId(clerkOrgId: string): Promise<string> {
-  const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("organizations")
-    .select("id")
-    .eq("clerk_org_id", clerkOrgId)
-    .single();
-
-  if (error || !data) {
-    throw new Error(`Organization not found: ${error?.message || "No data"}`);
-  }
-  return data.id;
-}
-
-// Helper to get org ID from env
+// Helper to get org ID from env (Supabase org id directly)
 async function getOrgId(): Promise<string> {
-  const clerkOrgId = process.env.CURRENT_ORG_ID;
-  if (!clerkOrgId) {
+  const orgId = process.env.CURRENT_ORG_ID;
+  if (!orgId) {
     throw new Error("CURRENT_ORG_ID not set");
   }
-  return getSupabaseOrgId(clerkOrgId);
+  return orgId;
 }
 
 // Tool: Search Candidates

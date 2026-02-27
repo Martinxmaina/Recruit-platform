@@ -44,7 +44,7 @@ export async function ensureUserHasOrg(
 	const orgName = email ? `${email.split("@")[0]}'s Organization` : "My Organization";
 	const { data: org, error: orgError } = await supabase
 		.from("organizations")
-		.insert({ name: orgName, clerk_org_id: null })
+		.insert({ name: orgName })
 		.select("id")
 		.single();
 

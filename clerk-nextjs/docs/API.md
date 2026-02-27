@@ -2,7 +2,7 @@
 
 Base URL: `http://localhost:3000` (or your deployment origin).
 
-All endpoints require **Clerk authentication**. Send the session cookie you get after signing in:
+All endpoints require authentication. Send the session cookie you get after signing in:
 
 - Sign in via the app in the browser.
 - Open DevTools → Application (or Storage) → Cookies → copy the `__session` cookie value (or the full `Cookie` header).
@@ -429,7 +429,7 @@ curl -s -X POST "${BASE}/api/v1/notifications" \
   -H "Cookie: ${COOKIE}" \
   -H "Content-Type: application/json" \
   -d '{
-    "user_id": "USER_CLERK_ID",
+    "user_id": "SUPABASE_USER_ID",
     "type": "application_update",
     "title": "New application",
     "message": "Jane Doe applied to Senior Engineer",

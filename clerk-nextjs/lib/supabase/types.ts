@@ -600,8 +600,7 @@ export type Database = {
         ]
       }
       organizations: {
-        Row: {
-          clerk_org_id: string | null
+      Row: {
           created_at: string | null
           id: string
           logo_url: string | null
@@ -610,7 +609,6 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          clerk_org_id?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
@@ -619,7 +617,6 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          clerk_org_id?: string | null
           created_at?: string | null
           id?: string
           logo_url?: string | null
