@@ -8,6 +8,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils/date";
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
 
@@ -76,7 +77,7 @@ export async function ClientJobsTab({ clientId }: ClientJobsTabProps) {
 							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{job.posted_at
-									? new Date(job.posted_at).toLocaleDateString()
+									? formatDate(job.posted_at)
 									: "—"}
 							</TableCell>
 							<TableCell>

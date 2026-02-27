@@ -91,7 +91,7 @@ export function JobsCardGrid({ jobs }: JobsCardGridProps) {
 							{job.posted_at && (
 								<div className="flex items-center gap-1 text-xs text-muted-foreground">
 									<Calendar className="size-3" />
-									{new Date(job.posted_at).toLocaleDateString()}
+									{formatDate(job.posted_at)}
 								</div>
 							)}
 							<Button variant="outline" size="sm" asChild>

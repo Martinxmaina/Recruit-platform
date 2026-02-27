@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ExternalLink, Trash2, Eye } from "lucide-react";
 import { getTrackedCandidates, removeFromTracking } from "./actions";
+import { formatDate } from "@/lib/utils/date";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -101,7 +102,7 @@ export default async function TrackingPage() {
 												)}
 											</TableCell>
 											<TableCell>
-												{new Date(item.created_at).toLocaleDateString()}
+												{formatDate(item.created_at)}
 											</TableCell>
 											<TableCell className="text-right">
 												<form action={handleRemove} className="inline">

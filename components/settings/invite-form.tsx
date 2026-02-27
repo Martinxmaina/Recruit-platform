@@ -21,12 +21,28 @@ interface InviteFormProps {
 
 function SubmitButton() {
 	const { pending } = useFormStatus();
-
 	return (
 		<Button type="submit" disabled={pending} className="gap-2">
 			<Send className="size-4" />
 			{pending ? "Sending..." : "Send Invite"}
 		</Button>
+	);
+}
+
+function EmailField() {
+	const { pending } = useFormStatus();
+	return (
+		<>
+			<Label htmlFor="email">Email address</Label>
+			<Input
+				id="email"
+				name="email"
+				type="email"
+				placeholder="colleague@company.com"
+				required
+				disabled={pending}
+			/>
+		</>
 	);
 }
 
@@ -51,15 +67,7 @@ export function InviteForm({ orgId }: InviteFormProps) {
 
 					<div className="grid gap-4 sm:grid-cols-3">
 						<div className="sm:col-span-2">
-							<Label htmlFor="email">Email address</Label>
-							<Input
-								id="email"
-								name="email"
-								type="email"
-								placeholder="colleague@company.com"
-								required
-								disabled={isPending}
-							/>
+							<EmailField />
 						</div>
 						<div>
 							<Label htmlFor="role">Role</Label>

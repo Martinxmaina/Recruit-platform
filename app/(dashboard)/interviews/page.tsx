@@ -1,4 +1,5 @@
 import { getInterviews } from "./actions";
+import { formatDate } from "@/lib/utils/date";
 import { InterviewsCalendar } from "@/components/interviews/interviews-calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,7 +63,7 @@ export default async function InterviewsPage() {
 											<div className="flex items-center gap-3">
 												<div className="text-right">
 													<p className="text-xs font-medium">
-														{new Date(interview.scheduled_at).toLocaleDateString()}
+														{formatDate(interview.scheduled_at)}
 													</p>
 													<p className="text-[10px] text-muted-foreground">
 														{new Date(interview.scheduled_at).toLocaleTimeString([], {

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Users, Trash2 } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 import { updateMemberRole, removeMember } from "@/app/(dashboard)/settings/actions";
 
 interface Member {
@@ -144,7 +145,7 @@ export function MembersList({ members }: MembersListProps) {
 												</Select>
 											</TableCell>
 											<TableCell className="text-muted-foreground text-sm">
-												{new Date(member.createdAt).toLocaleDateString()}
+												{formatDate(member.createdAt)}
 											</TableCell>
 											<TableCell>
 												<Button

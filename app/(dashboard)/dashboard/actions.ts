@@ -3,6 +3,7 @@
 import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import { formatDate } from "@/lib/utils/date";
 
 function getStartOfWeek(date: Date) {
 	const value = new Date(date);
@@ -110,7 +111,7 @@ export async function getUpcomingInterviews() {
 		id: i.id,
 		candidate: i.applications.candidates.full_name,
 		jobTitle: i.applications.jobs.title,
-		date: new Date(i.scheduled_at).toLocaleDateString(),
+		date: formatDate(i.scheduled_at),
 		time: new Date(i.scheduled_at).toLocaleTimeString([], {
 			hour: "2-digit",
 			minute: "2-digit",

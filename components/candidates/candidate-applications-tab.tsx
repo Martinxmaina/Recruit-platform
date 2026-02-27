@@ -8,6 +8,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils/date";
 import { Briefcase } from "lucide-react";
 import Link from "next/link";
 
@@ -65,7 +66,7 @@ export async function CandidateApplicationsTab({ candidateId }: CandidateApplica
 								</TableCell>
 								<TableCell className="text-muted-foreground">
 									{application.applied_at
-										? new Date(application.applied_at).toLocaleDateString()
+										? formatDate(application.applied_at)
 										: "—"}
 								</TableCell>
 								<TableCell>

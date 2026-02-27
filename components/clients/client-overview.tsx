@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Calendar, Globe, MapPin } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 import type { Client } from "./clients-table";
 
 interface ClientOverviewProps {
@@ -105,7 +106,7 @@ export function ClientOverview({ client }: ClientOverviewProps) {
 						</label>
 						<p className="mt-1">
 							{client.created_at
-								? new Date(client.created_at).toLocaleDateString()
+								? formatDate(client.created_at)
 								: "—"}
 						</p>
 					</div>

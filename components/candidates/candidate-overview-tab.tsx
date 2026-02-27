@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Phone, MapPin, Briefcase, Calendar, ExternalLink } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 import { ResumeViewer } from "@/components/candidates/resume-viewer";
 import type { Candidate } from "@/app/(dashboard)/candidates/actions";
 
@@ -110,7 +111,7 @@ export function CandidateOverviewTab({ candidate }: CandidateOverviewTabProps) {
 						</label>
 						<p className="mt-1">
 							{candidate.created_at
-								? new Date(candidate.created_at).toLocaleDateString()
+								? formatDate(candidate.created_at)
 								: "—"}
 						</p>
 					</div>

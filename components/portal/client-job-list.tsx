@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Briefcase, MapPin, Clock } from "lucide-react";
+import { formatDate } from "@/lib/utils/date";
 
 interface PortalJob {
 	id: string;
@@ -67,7 +68,7 @@ export function ClientJobList({ jobs }: ClientJobListProps) {
 							{job.created_at && (
 								<span className="flex items-center gap-1">
 									<Clock className="size-3" />
-									{new Date(job.created_at).toLocaleDateString()}
+									{formatDate(job.created_at)}
 								</span>
 							)}
 						</div>
