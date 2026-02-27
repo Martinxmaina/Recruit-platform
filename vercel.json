@@ -1,0 +1,6 @@
+{
+    "rootDirectory": "clerk-nextjs",
+    "framework": "nextjs",
+    "installCommand": "npm ci",
+    "buildCommand": "npm run build"
+}
