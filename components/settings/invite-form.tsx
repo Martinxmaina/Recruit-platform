@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,19 @@ interface InviteFormProps {
 	orgId: string;
 }
 
+function SubmitButton() {
+	const { pending } = useFormStatus();
+
+	return (
+		<Button type="submit" disabled={pending} className="gap-2">
+			<Send className="size-4" />
+			{pending ? "Sending..." : "Send Invite"}
+		</Button>
+	);
+}
+
 export function InviteForm({ orgId }: InviteFormProps) {
-	const [state, formAction, isPending] = useActionState(inviteMemberAction, {
+	const [state, formAction] = useFormState(inviteMemberAction, {
 		success: false,
 		message: "",
 	});
@@ -65,10 +76,7 @@ export function InviteForm({ orgId }: InviteFormProps) {
 					</div>
 
 					<div className="flex items-center gap-4">
-						<Button type="submit" disabled={isPending} className="gap-2">
-							<Send className="size-4" />
-							{isPending ? "Sending..." : "Send Invite"}
-						</Button>
+						<SubmitButton />
 						{state.message && (
 							<p
 								className={`text-sm ${
