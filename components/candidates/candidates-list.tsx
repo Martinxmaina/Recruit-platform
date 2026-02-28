@@ -22,9 +22,25 @@ type CandidateWithApplications = Candidate & {
 
 interface CandidatesListProps {
 	initialCandidates: CandidateWithApplications[];
+	jobs?: Array<{ id: string; title: string }>;
+	initialGroupBy?: string;
+	initialSort?: string;
+	initialLocation?: string;
+	initialJobId?: string;
+	initialDateRange?: string;
+	initialSource?: string;
 }
 
-export function CandidatesList({ initialCandidates }: CandidatesListProps) {
+export function CandidatesList({
+	initialCandidates,
+	jobs: _jobs,
+	initialGroupBy: _initialGroupBy,
+	initialSort: _initialSort,
+	initialLocation: _initialLocation,
+	initialJobId: _initialJobId,
+	initialDateRange: _initialDateRange,
+	initialSource: _initialSource,
+}: CandidatesListProps) {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [viewMode, setViewMode] = useState<"table" | "card">("table");
