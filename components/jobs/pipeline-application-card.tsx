@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate } from "@/lib/utils/date";
-import { GripVertical } from "lucide-react";
 
 interface ApplicationCardProps {
 	application: {
@@ -49,21 +48,18 @@ export function PipelineApplicationCard({ application }: ApplicationCardProps) {
 		.toUpperCase()
 		.slice(0, 2);
 
+	// Whole card is draggable; wrapper has ref so @dnd-kit can measure (Card does not forward ref)
 	return (
-		<Card
+		<div
 			ref={setNodeRef}
 			style={style}
 			className={`cursor-grab active:cursor-grabbing ${isDragging ? "ring-2 ring-primary" : ""}`}
+			{...attributes}
+			{...listeners}
 		>
+			<Card>
 			<CardContent className="p-4">
 				<div className="flex items-start gap-3">
-					<div
-						{...attributes}
-						{...listeners}
-						className="mt-1 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground"
-					>
-						<GripVertical className="size-4" />
-					</div>
 					<div className="flex-1 min-w-0">
 						<div className="flex items-center gap-2 mb-2">
 							<Avatar className="size-8">
@@ -110,5 +106,6 @@ export function PipelineApplicationCard({ application }: ApplicationCardProps) {
 				</div>
 			</CardContent>
 		</Card>
+		</div>
 	);
 }

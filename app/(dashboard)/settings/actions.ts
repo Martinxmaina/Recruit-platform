@@ -110,6 +110,7 @@ export type SettingsMember = {
 
 /**
  * Get organization members from org_members for the current org.
+ * Enriches with email and name from Auth via admin.getUserById.
  */
 export async function getMembers(): Promise<SettingsMember[]> {
 	const ctx = await getCurrentUserOrg();
@@ -127,13 +128,23 @@ export async function getMembers(): Promise<SettingsMember[]> {
 		return [];
 	}
 
-	return (rows ?? []).map((m) => ({
-		id: m.user_id,
-		firstName: "",
-		lastName: "",
-		email: "",
-		imageUrl: null,
-		role: toUiRole(m.role),
-		createdAt: m.created_at ? new Date(m.created_at).getTime() : 0,
-	}));
+	const withAuth = await Promise.all(
+		(rows ?? []).map(async (m) => {
+			const { data: authUser } = await supabase.auth.admin.getUserById(m.user_id);
+			const meta = authUser?.user?.user_metadata as Record<string, string> | undefined;
+			const fullName = meta?.full_name ?? meta?.name ?? "";
+			const [firstName = "", lastName = ""] = fullName ? fullName.trim().split(/\s+/, 2) : [];
+			return {
+				id: m.user_id,
+				firstName: meta?.first_name ?? firstName,
+				lastName: meta?.last_name ?? lastName,
+				email: authUser?.user?.email ?? "",
+				imageUrl: (meta?.avatar_url ?? meta?.picture ?? null) as string | null,
+				role: toUiRole(m.role),
+				createdAt: m.created_at ? new Date(m.created_at).getTime() : 0,
+			};
+		})
+	);
+
+	return withAuth;
 }

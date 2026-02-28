@@ -777,7 +777,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      set_user_context: { Args: { p_user_id: string }; Returns: undefined }
+      set_user_context: { Args: { p_user_id: string; p_user_name?: string | null }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

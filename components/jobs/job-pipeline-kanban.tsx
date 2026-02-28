@@ -48,19 +48,12 @@ export function JobPipelineKanban({ stages, applications, jobTitle = "" }: JobPi
 		})
 	);
 
-	// Group applications by stage (exact match first, then case-insensitive fallback)
+	// Group applications by canonical stage (exact match or variant e.g. "Hired 1" -> "Hired")
 	const applicationsByStage = stages.reduce(
 		(acc, stage) => {
 			acc[stage.name] = optimisticApplications.filter((app) => {
-				// Exact match (preferred)
 				if (app.stage === stage.name) return true;
-				// Case-insensitive fallback
-				if (app.stage?.toLowerCase() === stage.name.toLowerCase()) {
-					console.warn(
-						`Stage name mismatch: application stage "${app.stage}" doesn't match pipeline stage "${stage.name}" (case-insensitive match)`
-					);
-					return true;
-				}
+				if (app.stage?.startsWith(stage.name + " ")) return true;
 				return false;
 			});
 			return acc;
@@ -87,16 +80,25 @@ export function JobPipelineKanban({ stages, applications, jobTitle = "" }: JobPi
 		let targetStage = stages.find((s) => s.id === overId);
 		
 		if (!targetStage) {
-			// Dropped on another card, find that card's stage
+			// Dropped on another card; resolve to canonical stage (e.g. "Hired 2" -> "Hired")
 			const targetApplication = optimisticApplications.find((app) => app.id === overId);
 			if (!targetApplication) return;
-			targetStage = stages.find((s) => s.name === targetApplication.stage);
+			targetStage =
+				stages.find((s) => s.name === targetApplication.stage) ||
+				stages.find(
+					(s) =>
+						targetApplication.stage === s.name ||
+						targetApplication.stage.startsWith(s.name + " ")
+				);
 			if (!targetStage) return;
 		}
 
 		// Find the application being dragged
 		const application = optimisticApplications.find((app) => app.id === applicationId);
-		if (!application || application.stage === targetStage.name) return;
+		const alreadyInStage =
+			application?.stage === targetStage.name ||
+			application?.stage?.startsWith(targetStage.name + " ");
+		if (!application || alreadyInStage) return;
 
 		const fromStage = application.stage;
 

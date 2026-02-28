@@ -1,6 +1,4 @@
 import { Briefcase } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 
 interface CandidateExperienceTabProps {
 	candidateId: string;
@@ -9,27 +7,13 @@ interface CandidateExperienceTabProps {
 export function CandidateExperienceTab({
 	candidateId,
 }: CandidateExperienceTabProps) {
-	// Mock work history data
-	const workHistory = [
-		{
-			title: "Engineering Lead",
-			company: "ScaleUp Systems",
-			period: "2021 – Present",
-			achievements: [
-				"Architected and deployed a distributed microservices platform handling 1M+ req/sec.",
-				"Led a team of 12 engineers, mentoring through career growth and technical challenges.",
-			],
-		},
-		{
-			title: "Senior Software Engineer",
-			company: "CloudNexus Inc.",
-			period: "2018 – 2021",
-			achievements: [
-				"Redesigned core data ingestion pipeline, reducing latency by 65%.",
-				"Implemented comprehensive CI/CD workflows using GitHub Actions and ArgoCD.",
-			],
-		},
-	];
+	// TODO: Fetch work history from database or enriched profile when available
+	const workHistory: Array<{
+		title: string;
+		company: string;
+		period: string;
+		achievements: string[];
+	}> = [];
 
 	if (workHistory.length === 0) {
 		return (
@@ -56,12 +40,9 @@ export function CandidateExperienceTab({
 					<div className="w-[calc(100%-4rem)] md:w-[45%] bg-card p-5 rounded-xl border border-border shadow-sm">
 						<div className="flex items-center justify-between mb-1">
 							<h4 className="font-bold">{item.title}</h4>
-							<Badge
-								variant={index === 0 ? "default" : "secondary"}
-								className="text-[10px] font-medium px-2 py-0.5"
-							>
+							<span className="text-[10px] font-medium px-2 py-0.5 rounded bg-muted">
 								{item.period}
-							</Badge>
+							</span>
 						</div>
 						<div className="text-sm font-medium text-muted-foreground mb-3">
 							{item.company}

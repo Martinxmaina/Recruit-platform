@@ -6,8 +6,8 @@ const SUPABASE_ENV_MSG =
 
 /**
  * Creates a Supabase client using the service role key,
- * then sets `app.current_user_id` via a Postgres function
- * so RLS policies resolve correctly for the given user.
+ * then sets `app.current_user_id` and `app.current_user_name` via a Postgres function
+ * so RLS policies and activity log trigger resolve correctly for the given user.
  *
  * Use in API routes and server actions for org-scoped queries.
  */
@@ -21,9 +21,14 @@ export async function createAdminClient(userId: string) {
 		auth: { persistSession: false },
 	});
 
-	// Set user context for RLS via the custom Postgres function
+	const { getCurrentUser } = await import("@/lib/auth/session");
+	const user = await getCurrentUser();
+	const userName =
+		(user?.user_metadata?.full_name as string) ?? user?.email ?? userId;
+
 	const { error } = await supabase.rpc("set_user_context", {
 		p_user_id: userId,
+		p_user_name: userName,
 	});
 
 	if (error) {

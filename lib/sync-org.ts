@@ -67,3 +67,25 @@ export async function ensureUserHasOrg(
 
 	return org.id;
 }
+
+export type FirstOrg = { id: string; name: string };
+
+/**
+ * Fetches the first organization for a user via service-role (bypasses RLS).
+ * Use when getCurrentOrg fails (e.g. createAdminClient/set_user_context unavailable).
+ */
+export async function getFirstOrgForUser(
+	supabaseUserId: string
+): Promise<FirstOrg | null> {
+	const supabase = getServiceClient();
+	if (!supabase) return null;
+	const { data } = await supabase
+		.from("org_members")
+		.select("organization_id, organizations(id, name)")
+		.eq("user_id", supabaseUserId)
+		.limit(1)
+		.maybeSingle();
+	if (!data || !data.organizations) return null;
+	const org = data.organizations as { id: string; name: string };
+	return { id: org.id, name: org.name };
+}

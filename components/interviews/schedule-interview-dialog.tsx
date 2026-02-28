@@ -36,6 +36,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "lucide-react";
 
+function toLocalDatetimeInputValue(isoOrEmpty: string): string {
+	if (!isoOrEmpty) return "";
+	const d = new Date(isoOrEmpty);
+	const y = d.getFullYear();
+	const m = String(d.getMonth() + 1).padStart(2, "0");
+	const day = String(d.getDate()).padStart(2, "0");
+	const h = String(d.getHours()).padStart(2, "0");
+	const min = String(d.getMinutes()).padStart(2, "0");
+	return `${y}-${m}-${day}T${h}:${min}`;
+}
+
 interface ScheduleInterviewDialogProps {
 	applicationId?: string;
 	jobId?: string;
@@ -168,11 +179,7 @@ export function ScheduleInterviewDialog({
 										<Input
 											type="datetime-local"
 											{...field}
-											value={
-												field.value
-													? new Date(field.value).toISOString().slice(0, 16)
-													: ""
-											}
+											value={toLocalDatetimeInputValue(field.value ?? "")}
 											onChange={(e) => {
 												const value = e.target.value;
 												field.onChange(

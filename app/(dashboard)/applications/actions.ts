@@ -132,13 +132,22 @@ export async function createApplication(
 		return { error: "Application already exists" };
 	}
 
+	// Use first pipeline stage for this org so stage satisfies applications_stage_check
+	const { data: stages } = await supabase
+		.from("pipeline_stages")
+		.select("name")
+		.eq("organization_id", ctx.orgId)
+		.order("sort_order", { ascending: true })
+		.limit(1);
+	const initialStage = data?.stage || stages?.[0]?.name || "New";
+
 	const { data: application, error } = await supabase
 		.from("applications")
 		.insert({
 			organization_id: ctx.orgId,
 			candidate_id: candidateId,
 			job_id: jobId,
-			stage: data?.stage || "New",
+			stage: initialStage,
 			status: data?.status || "active",
 			applied_at: data?.applied_at || new Date().toISOString(),
 		})

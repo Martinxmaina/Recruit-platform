@@ -43,35 +43,47 @@ export async function getPipelineStages() {
 		return await ensureDefaultStages(ctx.userId, ctx.orgId);
 	}
 
-	return stages ?? [];
+	// Dedupe by name (keep first by sort_order) so UI shows one column per stage name
+	const byName = new Map<string, (typeof stages)[0]>();
+	for (const s of stages) {
+		if (!byName.has(s.name)) byName.set(s.name, s);
+	}
+	return Array.from(byName.values()).sort((a, b) => a.sort_order - b.sort_order);
 }
 
 async function ensureDefaultStages(userId: string, orgId: string) {
 	const supabase = await createAdminClient(userId);
 
-	// Check if stages already exist
-	const { data: existing } = await supabase
+	const { data: existingStages } = await supabase
 		.from("pipeline_stages")
-		.select("id")
-		.eq("organization_id", orgId)
-		.limit(1);
+		.select("name")
+		.eq("organization_id", orgId);
+	const existingNames = new Set((existingStages ?? []).map((s) => s.name));
 
-	if (existing && existing.length > 0) {
-		// Stages already exist, fetch and return them
+	if (existingNames.size > 0) {
+		// Fetch full list and return deduped
 		const { data: stages } = await supabase
 			.from("pipeline_stages")
 			.select("*")
 			.eq("organization_id", orgId)
 			.order("sort_order", { ascending: true });
-		return stages ?? [];
+		if (!stages?.length) return [];
+		const byName = new Map<string, (typeof stages)[0]>();
+		for (const s of stages) {
+			if (!byName.has(s.name)) byName.set(s.name, s);
+		}
+		return Array.from(byName.values()).sort((a, b) => a.sort_order - b.sort_order);
 	}
 
-	// Create default stages
-	const stagesToInsert = DEFAULT_STAGES.map((stage) => ({
-		organization_id: orgId,
-		name: stage.name,
-		sort_order: stage.sort_order,
-	}));
+	// Create only default stages whose name is not already present
+	const stagesToInsert = DEFAULT_STAGES.filter((stage) => !existingNames.has(stage.name)).map(
+		(stage) => ({
+			organization_id: orgId,
+			name: stage.name,
+			sort_order: stage.sort_order,
+		})
+	);
+	if (stagesToInsert.length === 0) return [];
 
 	const { data: newStages, error } = await supabase
 		.from("pipeline_stages")
@@ -100,7 +112,20 @@ export async function createPipelineStage(name: string, sort_order?: number) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
+	const trimmedName = name.trim();
 	const supabase = await createAdminClient(ctx.userId);
+
+	const { data: existing } = await supabase
+		.from("pipeline_stages")
+		.select("id")
+		.eq("organization_id", ctx.orgId)
+		.eq("name", trimmedName)
+		.limit(1)
+		.maybeSingle();
+	if (existing) {
+		return { error: "A stage with this name already exists" };
+	}
+
 	if (sort_order === undefined) {
 		const { data: lastStage } = await supabase
 			.from("pipeline_stages")
@@ -117,7 +142,7 @@ export async function createPipelineStage(name: string, sort_order?: number) {
 		.from("pipeline_stages")
 		.insert({
 			organization_id: ctx.orgId,
-			name: name.trim(),
+			name: trimmedName,
 			sort_order,
 		})
 		.select()

@@ -28,6 +28,7 @@ const actionIcons: Record<string, React.ReactNode> = {
 	stage_changed: <ArrowRight className="size-4" />,
 	status_changed: <CheckCircle className="size-4" />,
 	interview_scheduled: <Calendar className="size-4" />,
+	interview_updated: <Calendar className="size-4" />,
 	interview_completed: <CheckCircle className="size-4" />,
 	interview_cancelled: <XCircle className="size-4" />,
 	note_added: <MessageSquare className="size-4" />,
@@ -38,11 +39,16 @@ const actionIcons: Record<string, React.ReactNode> = {
 
 const actionColors: Record<string, string> = {
 	application_created: "bg-blue-500",
+	application_updated: "bg-blue-500",
 	stage_changed: "bg-purple-500",
 	status_changed: "bg-green-500",
 	interview_scheduled: "bg-orange-500",
+	interview_updated: "bg-orange-500",
 	interview_completed: "bg-green-500",
+	interview_cancelled: "bg-red-500",
 	note_added: "bg-yellow-500",
+	candidate_created: "bg-indigo-500",
+	candidate_updated: "bg-indigo-500",
 	candidate_tracked: "bg-indigo-500",
 };
 
@@ -56,37 +62,50 @@ function formatActionType(actionType: string): string {
 function getActionDescription(activity: ActivityLog): string {
 	const { action_type, old_values, new_values, action_details } = activity;
 
-	if (action_type === "stage_changed" && old_values && new_values) {
-		const oldStage = (old_values as { stage?: string }).stage || "Unknown";
+	if (action_type === "stage_changed" && new_values) {
 		const newStage = (new_values as { stage?: string }).stage || "Unknown";
+		const oldStage = (old_values as { stage?: string })?.stage;
 		const note = action_details?.note as string | undefined;
-		return `Moved from "${oldStage}" to "${newStage}"${note ? `: ${note}` : ""}`;
+		const from = oldStage ? ` from ${oldStage}` : "";
+		return `moved the candidate to ${newStage}${from}${note ? `: ${note}` : ""}`;
 	}
 
 	if (action_type === "status_changed" && old_values && new_values) {
 		const oldStatus = (old_values as { status?: string }).status || "Unknown";
 		const newStatus = (new_values as { status?: string }).status || "Unknown";
-		return `Status changed from "${oldStatus}" to "${newStatus}"`;
+		return `changed status from "${oldStatus}" to "${newStatus}"`;
 	}
 
 	if (action_type === "interview_scheduled") {
 		const interviewer = action_details?.interviewer_name as string | undefined;
 		const scheduledAt = action_details?.scheduled_at as string | undefined;
 		if (interviewer && scheduledAt) {
-			return `Scheduled with ${interviewer} on ${formatDate(scheduledAt)}`;
+			return `scheduled an interview with ${interviewer} on ${formatDate(scheduledAt)}`;
 		}
-		return "Interview scheduled";
+		return "scheduled an interview";
 	}
+
+	if (action_type === "interview_updated") return "updated the interview";
+	if (action_type === "interview_completed") return "marked the interview as completed";
+	if (action_type === "interview_cancelled") return "cancelled the interview";
 
 	if (action_type === "note_added") {
 		const content = action_details?.content as string | undefined;
 		if (content) {
-			return content.length > 100 ? `${content.substring(0, 100)}...` : content;
+			const preview = content.length > 80 ? `${content.substring(0, 80)}...` : content;
+			return `added notes: ${preview}`;
 		}
-		return "Note added";
+		return "added notes";
 	}
 
-	return formatActionType(action_type);
+	if (action_type === "application_created") return "added the candidate to the job";
+	if (action_type === "application_updated") return "updated the application";
+
+	if (action_type === "candidate_created") return "created the candidate";
+	if (action_type === "candidate_updated") return "updated the candidate";
+	if (action_type === "candidate_tracked") return "added the candidate to tracking";
+
+	return formatActionType(action_type).toLowerCase();
 }
 
 function getEntityLink(activity: ActivityLog): string | null {
@@ -174,17 +193,19 @@ export function ActivityTimeline({
 												<div className="flex-1 min-w-0">
 													<div className="flex items-start justify-between gap-2">
 														<div className="flex-1">
-															<div className="flex items-center gap-2 flex-wrap">
-																<span className="font-semibold text-sm">
-																	{activity.user_name}
+															<p className="text-sm">
+																<span className="font-semibold">{activity.user_name}</span>{" "}
+																<span className="text-muted-foreground">
+																	{getActionDescription(activity)}
 																</span>
-																<span className="text-muted-foreground text-xs">
-																	{formatActionType(activity.action_type)}
-																</span>
-															</div>
-															<p className="text-sm text-muted-foreground mt-1">
-																{getActionDescription(activity)}
 															</p>
+															{activity.user_email && (
+																<p className="text-xs text-muted-foreground mt-0.5">
+																	<a href={`mailto:${activity.user_email}`} className="hover:underline">
+																		{activity.user_email}
+																	</a>
+																</p>
+															)}
 															{activity.duration_minutes && (
 																<Badge variant="outline" className="mt-2 text-xs">
 																	<Clock className="mr-1 size-3" />

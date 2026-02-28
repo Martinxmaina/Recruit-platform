@@ -11,6 +11,7 @@ export type ActivityLog = {
 	candidate_id: string | null;
 	user_id: string;
 	user_name: string;
+	user_email?: string | null;
 	action_type: string;
 	action_details: Record<string, unknown>;
 	old_values: Record<string, unknown> | null;
@@ -19,6 +20,49 @@ export type ActivityLog = {
 	created_at: string;
 	metadata: Record<string, unknown>;
 };
+
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Enrich activity rows with current user name/email from Auth */
+async function enrichActivityWithUser(
+	supabase: Awaited<ReturnType<typeof import("@/lib/supabase/admin").createAdminClient>>,
+	rows: ActivityLog[]
+): Promise<ActivityLog[]> {
+	const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+	const userMap: Record<string, { name: string; email: string | null }> = {};
+	type AuthAdmin = { getUserById?: (id: string) => Promise<{ data: { user?: { email?: string; user_metadata?: Record<string, unknown> } } }> };
+	const authAdmin = (supabase as { auth?: { admin?: AuthAdmin } }).auth?.admin;
+	await Promise.all(
+		userIds.map(async (uid) => {
+			const fallbackRow = rows.find((r) => r.user_id === uid);
+			if (!UUID_REGEX.test(uid)) {
+				userMap[uid] = { name: fallbackRow?.user_name ?? uid, email: null };
+				return;
+			}
+			try {
+				if (!authAdmin?.getUserById) {
+					userMap[uid] = { name: fallbackRow?.user_name ?? uid, email: null };
+					return;
+				}
+				const { data } = await authAdmin.getUserById(uid);
+				const meta = data?.user?.user_metadata as Record<string, string> | undefined;
+				const name = (meta?.full_name ?? meta?.name ?? data?.user?.email ?? fallbackRow?.user_name ?? uid) as string;
+				const email = (data?.user?.email ?? null) as string | null;
+				userMap[uid] = { name, email };
+			} catch {
+				userMap[uid] = { name: fallbackRow?.user_name ?? uid, email: null };
+			}
+		})
+	);
+	return rows.map((row) => {
+		const u = userMap[row.user_id];
+		return {
+			...row,
+			user_name: u ? u.name : row.user_name,
+			user_email: u?.email ?? null,
+		};
+	});
+}
 
 /**
  * Get all activity for a specific candidate
@@ -41,7 +85,8 @@ export async function getCandidateActivity(candidateId: string) {
 		return [];
 	}
 
-	return (data as ActivityLog[]) ?? [];
+	const rows = (data as ActivityLog[]) ?? [];
+	return enrichActivityWithUser(supabase, rows);
 }
 
 /**
@@ -76,7 +121,8 @@ export async function getJobActivity(jobId: string) {
 		return [];
 	}
 
-	return (data as ActivityLog[]) ?? [];
+	const rows = (data as ActivityLog[]) ?? [];
+	return enrichActivityWithUser(supabase, rows);
 }
 
 /**
@@ -108,7 +154,40 @@ export async function getUserActivity(dateRange?: { start?: string; end?: string
 		return [];
 	}
 
-	return (data as ActivityLog[]) ?? [];
+	const rows = (data as ActivityLog[]) ?? [];
+	return enrichActivityWithUser(supabase, rows);
+}
+
+/**
+ * Get org-wide activity (all members) for team workflow feed
+ */
+export async function getOrgActivity(dateRange?: { start?: string; end?: string }) {
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
+
+	const supabase = await createAdminClient(ctx.userId);
+	let query = supabase
+		.from("activity_logs")
+		.select("*")
+		.eq("organization_id", ctx.orgId)
+		.order("created_at", { ascending: false });
+
+	if (dateRange?.start) {
+		query = query.gte("created_at", dateRange.start);
+	}
+	if (dateRange?.end) {
+		query = query.lte("created_at", dateRange.end);
+	}
+
+	const { data, error } = await query.limit(400);
+
+	if (error) {
+		console.error("Error fetching org activity:", error);
+		return [];
+	}
+
+	const rows = (data as ActivityLog[]) ?? [];
+	return enrichActivityWithUser(supabase, rows);
 }
 
 /**

@@ -62,6 +62,7 @@ export async function getInterviews(filters?: {
 			*,
 			applications!inner(
 				id,
+				stage,
 				candidates!inner(
 					id,
 					full_name,
@@ -126,6 +127,7 @@ export async function getInterview(id: string) {
 			*,
 			applications!inner(
 				id,
+				stage,
 				candidates!inner(
 					id,
 					full_name,
@@ -194,6 +196,7 @@ export async function createInterview(
 		return { error: error.message };
 	}
 
+	revalidatePath("/interviews");
 	revalidatePath("/jobs");
 	revalidatePath("/candidates");
 	revalidatePath(`/jobs/${application.job_id}`);

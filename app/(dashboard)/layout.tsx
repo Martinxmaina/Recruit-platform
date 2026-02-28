@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/app-shell/sidebar";
 import { Header } from "@/components/app-shell/header";
 import { NoOrgScreen } from "@/components/app-shell/no-org-screen";
 import { CopilotProvider, CopilotPanel } from "@/components/copilot";
-import { ensureUserHasOrg } from "@/lib/sync-org";
+import { ensureUserHasOrg, getFirstOrgForUser } from "@/lib/sync-org";
 import {
 	getNotifications,
 	getUnreadCount,
@@ -31,7 +31,9 @@ export default async function DashboardLayout({
 			console.error("Ensure org error:", err);
 		}
 	}
-
+	if (!org) {
+		org = await getFirstOrgForUser(user.id);
+	}
 	if (!org) {
 		return <NoOrgScreen />;
 	}
@@ -39,13 +41,20 @@ export default async function DashboardLayout({
 	const supabaseConfigured =
 		!!process.env.NEXT_PUBLIC_SUPABASE_URL && !!process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-	const [notifications, unreadCount, role] = supabaseConfigured
-		? await Promise.all([
+	let notifications: Notification[] = [];
+	let unreadCount = 0;
+	let role: "admin" | "recruiter" | "client" = "recruiter";
+	if (supabaseConfigured) {
+		try {
+			[notifications, unreadCount, role] = await Promise.all([
 				getNotifications(10),
 				getUnreadCount(),
 				getCurrentRole(),
-			])
-		: ([[], 0, "recruiter"] as [Notification[], number, "admin" | "recruiter" | "client"]);
+			]);
+		} catch (err) {
+			console.error("Dashboard layout: notifications/role fetch failed", err);
+		}
+	}
 
 	const serializedNotifications = notifications.map((n) => ({
 		id: n.id,

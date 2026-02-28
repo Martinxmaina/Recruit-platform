@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, Calendar, TrendingUp } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Clock, Calendar, TrendingUp, Users } from "lucide-react";
 import { ActivityTimeline } from "./activity-timeline";
 import type { ActivityLog } from "@/app/(dashboard)/activity/actions";
 
 interface UserWorklogProps {
 	activities: ActivityLog[];
+	orgActivities: ActivityLog[];
 	stats: {
 		totalActivities: number;
 		totalHours: number;
@@ -16,15 +17,38 @@ interface UserWorklogProps {
 	};
 }
 
-export function UserWorklog({ activities, stats }: UserWorklogProps) {
-	const [selectedDateRange, setSelectedDateRange] = useState<"today" | "week" | "month">(
-		"week"
-	);
-
+export function UserWorklog({ activities, orgActivities, stats }: UserWorklogProps) {
 	return (
 		<div className="space-y-6">
-			{/* Stats Cards */}
-			<div className="grid gap-4 md:grid-cols-3">
+			<Tabs defaultValue="workflow" className="space-y-4">
+				<TabsList>
+					<TabsTrigger value="workflow" className="gap-2">
+						<Users className="size-4" />
+						Team workflow
+					</TabsTrigger>
+					<TabsTrigger value="mine" className="gap-2">
+						<Calendar className="size-4" />
+						My activity
+					</TabsTrigger>
+				</TabsList>
+
+				<TabsContent value="workflow" className="space-y-4">
+					<Card>
+						<CardHeader>
+							<CardTitle className="text-base">Team workflow</CardTitle>
+							<p className="text-sm text-muted-foreground">
+								{orgActivities.length} actions in the last 30 days
+							</p>
+						</CardHeader>
+						<CardContent>
+							<ActivityTimeline activities={orgActivities} showCandidateLinks={true} />
+						</CardContent>
+					</Card>
+				</TabsContent>
+
+				<TabsContent value="mine" className="space-y-6">
+					{/* Stats Cards */}
+					<div className="grid gap-4 md:grid-cols-3">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">Total Activities</CardTitle>
@@ -82,14 +106,16 @@ export function UserWorklog({ activities, stats }: UserWorklogProps) {
 			)}
 
 			{/* Activity Timeline */}
-			<Card>
-				<CardHeader>
-					<CardTitle>Activity Timeline</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<ActivityTimeline activities={activities} showCandidateLinks={true} />
-				</CardContent>
-			</Card>
+					<Card>
+						<CardHeader>
+							<CardTitle>Activity Timeline</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<ActivityTimeline activities={activities} showCandidateLinks={true} />
+						</CardContent>
+					</Card>
+				</TabsContent>
+			</Tabs>
 		</div>
 	);
 }
