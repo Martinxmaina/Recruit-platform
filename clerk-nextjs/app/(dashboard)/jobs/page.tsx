@@ -12,6 +12,7 @@ export default async function JobsPage({
 		work_type?: string;
 		country?: string;
 		client_id?: string;
+		sort?: string;
 	}>;
 }) {
 	const params = await searchParams;
@@ -21,6 +22,7 @@ export default async function JobsPage({
 		work_type: params.work_type,
 		country: params.country,
 		client_id: params.client_id,
+		sort: params.sort,
 	});
 	const clients = await getClients();
 

@@ -86,6 +86,8 @@ export function ScheduleInterviewDialog({
 				scheduled_at: data.scheduled_at,
 				status: data.status,
 				notes: data.notes,
+				interviewer_name: data.interviewer_name || null,
+				interviewer_user_id: data.interviewer_user_id || null,
 			});
 
 			if (result.error) {

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { ensureUserHasOrg } from "@/lib/sync-org";
+import { acceptInvite } from "@/app/(dashboard)/settings/actions";
 
 export async function signIn(formData: FormData) {
 	const email = (formData.get("email") as string)?.trim();
@@ -30,6 +31,14 @@ export async function signUp(formData: FormData) {
 			await ensureUserHasOrg(data.user.id, data.user.email ?? undefined);
 		} catch {
 			// non-fatal
+		}
+		const inviteToken = (formData.get("invite") as string)?.trim();
+		if (inviteToken) {
+			try {
+				await acceptInvite(data.user.id, inviteToken);
+			} catch {
+				// non-fatal
+			}
 		}
 	}
 	redirect("/dashboard");

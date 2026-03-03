@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { ExternalLink, Trash2, Eye } from "lucide-react";
-import { getTrackedCandidates, removeFromTracking } from "./actions";
+import { ExternalLink, Eye } from "lucide-react";
+import { getTrackedCandidates } from "./actions";
 import { Button } from "@/components/ui/button";
 import {
 	Table,
@@ -11,15 +11,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-async function handleRemove(formData: FormData) {
-	"use server";
-	const trackedId = String(formData.get("tracked_id") || "");
-	if (!trackedId) {
-		return;
-	}
-	await removeFromTracking(trackedId);
-}
+import { RemoveFromTrackingButton } from "@/components/tracking/remove-from-tracking-button";
 
 export default async function TrackingPage() {
 	const tracked = await getTrackedCandidates();
@@ -104,12 +96,7 @@ export default async function TrackingPage() {
 												{new Date(item.created_at).toLocaleDateString()}
 											</TableCell>
 											<TableCell className="text-right">
-												<form action={handleRemove} className="inline">
-													<input type="hidden" name="tracked_id" value={item.id} />
-													<Button type="submit" variant="ghost" size="icon" aria-label="Remove from tracking">
-														<Trash2 className="size-4 text-destructive" />
-													</Button>
-												</form>
+												<RemoveFromTrackingButton trackedId={item.id} />
 											</TableCell>
 										</TableRow>
 									))}

@@ -125,11 +125,12 @@ export async function getJobs(filters?: {
 	country?: string;
 	client_id?: string;
 	search?: string;
+	sort?: string;
 }) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	let query = supabase
 		.from("jobs")
 		.select("*, clients(name)")
@@ -155,7 +156,9 @@ export async function getJobs(filters?: {
 		query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
 	}
 
-	const { data: jobs, error } = await query.order("created_at", { ascending: false });
+	const orderCol = filters?.sort?.startsWith("posted_at") ? "posted_at" : "created_at";
+	const ascending = filters?.sort === "posted_at_asc" || filters?.sort === "created_at_asc";
+	const { data: jobs, error } = await query.order(orderCol, { ascending });
 
 	if (error) {
 		console.error("Error fetching jobs:", error);
@@ -169,7 +172,7 @@ export async function getJob(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: job, error } = await supabase
 		.from("jobs")
 		.select("*, clients(name)")
@@ -204,7 +207,7 @@ export async function createJob(data: {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: job, error } = await supabase
 		.from("jobs")
 		.insert({
@@ -259,7 +262,7 @@ export async function updateJob(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const updateData: Record<string, unknown> = {
 		updated_at: new Date().toISOString(),
 	};
@@ -315,7 +318,7 @@ export async function deleteJob(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("jobs")
 		.delete()
@@ -329,4 +332,34 @@ export async function deleteJob(id: string) {
 
 	revalidatePath("/jobs");
 	return { success: true };
+}
+
+export async function sendJobsToJobSearchWebhook(
+	jobs: Array<Job & { clients?: { name: string } | null }>
+): Promise<{ success: true } | { error: string }> {
+	const url = process.env.JOB_SEARCH_WEBHOOK_URL;
+	if (!url) {
+		return { error: "Webhook URL not configured" };
+	}
+	const payload = jobs.map((job) => {
+		const { clients, ...rest } = job;
+		return {
+			...rest,
+			client_name: clients?.name ?? null,
+		};
+	});
+	try {
+		const res = await fetch(url, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(payload),
+		});
+		if (!res.ok) {
+			return { error: `Webhook returned ${res.status}` };
+		}
+		return { success: true };
+	} catch (e) {
+		const message = e instanceof Error ? e.message : "Request failed";
+		return { error: message };
+	}
 }

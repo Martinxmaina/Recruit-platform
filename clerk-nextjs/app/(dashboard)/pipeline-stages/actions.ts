@@ -27,7 +27,7 @@ export async function getPipelineStages() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: stages, error } = await supabase
 		.from("pipeline_stages")
 		.select("*")
@@ -47,7 +47,7 @@ export async function getPipelineStages() {
 }
 
 async function ensureDefaultStages(userId: string, orgId: string) {
-	const supabase = await createAdminClient(userId);
+	const supabase = await createAdminClient(userId, undefined);
 
 	// Check if stages already exist
 	const { data: existing } = await supabase
@@ -100,7 +100,7 @@ export async function createPipelineStage(name: string, sort_order?: number) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	if (sort_order === undefined) {
 		const { data: lastStage } = await supabase
 			.from("pipeline_stages")
@@ -139,7 +139,7 @@ export async function updatePipelineStage(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const updateData: Record<string, unknown> = {};
 
 	if (data.name !== undefined) updateData.name = data.name.trim();
@@ -166,7 +166,7 @@ export async function deletePipelineStage(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: stage } = await supabase
 		.from("pipeline_stages")
 		.select("name")
@@ -215,7 +215,7 @@ export async function reorderPipelineStages(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const updates = stages.map((stage) =>
 		supabase
 			.from("pipeline_stages")

@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Candidate } from "@/app/(dashboard)/candidates/actions";
 import { AddToTrackingButton } from "@/components/tracking/add-to-tracking-button";
+import { formatDate } from "@/lib/utils/date";
 
 type CandidateWithApplications = Candidate & {
 	applications?: Array<{
@@ -44,6 +45,7 @@ type CandidateWithApplications = Candidate & {
 		stage: string;
 		status: string;
 		screening_score: number | null;
+		applied_at?: string | null;
 		jobs?: { id: string; title: string } | null;
 	}>;
 };
@@ -92,10 +94,60 @@ const columns: ColumnDef<CandidateWithApplications>[] = [
 	{
 		accessorKey: "email",
 		header: "Email",
+		cell: ({ row }) => (
+			<span className="text-muted-foreground">
+				{row.getValue("email") || "—"}
+			</span>
+		),
+	},
+	{
+		accessorKey: "phone",
+		header: "Phone",
+		cell: ({ row }) => (
+			<span className="text-muted-foreground text-sm">
+				{row.getValue("phone") || "—"}
+			</span>
+		),
+	},
+	{
+		accessorKey: "source",
+		header: "Source",
+		cell: ({ row }) => (
+			<span className="text-sm">{row.getValue("source") || "—"}</span>
+		),
+	},
+	{
+		accessorKey: "location",
+		header: "Location",
+		cell: ({ row }) => (
+			<span className="text-muted-foreground text-sm">
+				{row.getValue("location") || "—"}
+			</span>
+		),
+	},
+	{
+		accessorKey: "created_at",
+		header: "Created",
 		cell: ({ row }) => {
+			const v = row.getValue("created_at") as string | null;
 			return (
-				<span className="text-muted-foreground">
-					{row.getValue("email") || "—"}
+				<span className="text-muted-foreground text-sm">
+					{v ? formatDate(v) : "—"}
+				</span>
+			);
+		},
+	},
+	{
+		id: "applied_at",
+		header: "Applied",
+		cell: ({ row }) => {
+			const candidate = row.original;
+			const applications = candidate.applications || [];
+			const latest = applications[0];
+			const appliedAt = latest?.applied_at;
+			return (
+				<span className="text-muted-foreground text-sm">
+					{appliedAt ? formatDate(appliedAt) : "—"}
 				</span>
 			);
 		},
@@ -238,10 +290,9 @@ export function CandidatesTable({ initialData }: CandidatesTableProps) {
 	const [sorting, setSorting] = React.useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-	const [data] = React.useState<CandidateWithApplications[]>(initialData);
 
 	const table = useReactTable({
-		data,
+		data: initialData,
 		columns,
 		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
@@ -259,7 +310,7 @@ export function CandidatesTable({ initialData }: CandidatesTableProps) {
 
 	return (
 		<div className="w-full space-y-4">
-			<div className="overflow-hidden rounded-md border">
+			<div className="overflow-x-auto overflow-y-hidden rounded-md border">
 				<Table>
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (

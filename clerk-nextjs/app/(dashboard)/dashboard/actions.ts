@@ -49,7 +49,7 @@ export async function getDashboardStats() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const now = new Date();
 	const weekStart = getStartOfWeek(now).toISOString();
 	const weekEnd = getEndOfWeek(now).toISOString();
@@ -89,7 +89,7 @@ export async function getUpcomingInterviews() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("interviews")
 		.select(`
@@ -119,30 +119,106 @@ export async function getUpcomingInterviews() {
 	}));
 }
 
+/** Build short description from activity_log row (mirrors activity-timeline logic). */
+function getActivityDescription(row: {
+	action_type: string;
+	old_values?: Record<string, unknown> | null;
+	new_values?: Record<string, unknown> | null;
+	action_details?: Record<string, unknown>;
+}): string {
+	const { action_type, old_values, new_values, action_details } = row;
+	if (action_type === "stage_changed" && new_values) {
+		const newStage = (new_values as { stage?: string }).stage || "Unknown";
+		const oldStage = (old_values as { stage?: string })?.stage;
+		const note = action_details?.note as string | undefined;
+		const from = oldStage ? ` from ${oldStage}` : "";
+		return `moved the candidate to ${newStage}${from}${note ? `: ${note}` : ""}`;
+	}
+	if (action_type === "status_changed" && old_values && new_values) {
+		const oldStatus = (old_values as { status?: string }).status || "Unknown";
+		const newStatus = (new_values as { status?: string }).status || "Unknown";
+		return `changed status from "${oldStatus}" to "${newStatus}"`;
+	}
+	if (action_type === "interview_scheduled") {
+		const interviewer = action_details?.interviewer_name as string | undefined;
+		const scheduledAt = action_details?.scheduled_at as string | undefined;
+		if (interviewer && scheduledAt) {
+			const d = new Date(scheduledAt).toLocaleDateString("en-US", {
+				month: "short",
+				day: "numeric",
+				year: "numeric",
+			});
+			return `scheduled an interview with ${interviewer} on ${d}`;
+		}
+		return "scheduled an interview";
+	}
+	if (action_type === "note_added") {
+		const content = action_details?.content as string | undefined;
+		if (content) {
+			const preview = content.length > 80 ? `${content.substring(0, 80)}...` : content;
+			return `added notes: ${preview}`;
+		}
+		return "added notes";
+	}
+	if (action_type === "application_created") return "added the candidate to the job";
+	if (action_type === "candidate_created") return "created the candidate";
+	if (action_type === "candidate_tracked") return "added candidate to tracking";
+	const formatted = action_type
+		.split("_")
+		.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+		.join(" ");
+	return formatted.toLowerCase();
+}
+
+/** Build link for activity item (candidate or job). */
+function getActivityLink(row: {
+	entity_type: string;
+	entity_id: string;
+	candidate_id: string | null;
+	action_details?: Record<string, unknown>;
+}): string | null {
+	if (row.entity_type === "candidate" || row.candidate_id) {
+		return `/candidates/${row.candidate_id || row.entity_id}`;
+	}
+	if (row.entity_type === "application") {
+		const jobId = (row.action_details as { job_id?: string })?.job_id;
+		if (jobId) return `/jobs/${jobId}`;
+		return row.candidate_id ? `/candidates/${row.candidate_id}` : null;
+	}
+	if (row.entity_type === "job") return `/jobs/${row.entity_id}`;
+	return null;
+}
+
 export async function getRecentActivity() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
-		.from("applications")
-		.select(`
-			id,
-			updated_at,
-			status,
-			stage,
-			candidates!inner (full_name),
-			jobs!inner (title)
-		`)
+		.from("activity_logs")
+		.select("*")
 		.eq("organization_id", ctx.orgId)
-		.order("updated_at", { ascending: false })
-		.limit(5);
+		.order("created_at", { ascending: false })
+		.limit(10);
 
-	return (data ?? []).map((a: any) => ({
-		id: a.id,
-		title: "Application Updated",
-		description: `${a.candidates.full_name} moved to ${a.stage} for ${a.jobs.title}`,
-		time: formatActivityTime(a.updated_at),
+	if (!data || data.length === 0) return [];
+
+	return data.map((row: Record<string, unknown>) => ({
+		id: row.id as string,
+		user_name: (row.user_name as string) || "System",
+		description: getActivityDescription({
+			action_type: row.action_type as string,
+			old_values: row.old_values as Record<string, unknown> | null,
+			new_values: row.new_values as Record<string, unknown> | null,
+			action_details: (row.action_details as Record<string, unknown>) ?? {},
+		}),
+		time: formatActivityTime(row.created_at as string),
+		link: getActivityLink({
+			entity_type: row.entity_type as string,
+			entity_id: row.entity_id as string,
+			candidate_id: row.candidate_id as string | null,
+			action_details: row.action_details as Record<string, unknown>,
+		}),
 	}));
 }
 
@@ -150,7 +226,7 @@ export async function getApplicationsOverTime() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const thirtyDaysAgo = subtractDays(new Date(), 30).toISOString();
 
 	const { data } = await supabase
@@ -177,7 +253,7 @@ export async function getJobStatusDistribution() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("jobs")
 		.select("status")
@@ -200,7 +276,7 @@ export async function getPipelineConversionMetrics() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: stages } = await supabase
 		.from("pipeline_stages")
 		.select("name, sort_order")
@@ -234,7 +310,7 @@ export async function getInterviewAnalytics() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { completionRate: 0, avgDaysToHire: 0, byStatus: [] };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: interviews } = await supabase
 		.from("interviews")
 		.select("status, scheduled_at")
@@ -282,7 +358,7 @@ export async function getCandidatesForExport() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("candidates")
 		.select("full_name, email, phone, location, current_title, source, created_at")
@@ -299,7 +375,7 @@ export async function getJobsForExport() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("jobs")
 		.select("title, status, location, country, work_type, created_at, clients(name)")

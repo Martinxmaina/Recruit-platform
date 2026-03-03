@@ -9,11 +9,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export default async function SignUpPage({
 	searchParams,
 }: {
-	searchParams: Promise<{ error?: string }>;
+	searchParams: Promise<{ error?: string; invite?: string }>;
 }) {
 	const session = await getSession();
 	if (session) redirect("/dashboard");
-	const { error } = await searchParams;
+	const params = await searchParams;
+	const { error, invite: inviteToken } = params;
 
 	return (
 		<div className="flex min-h-[80vh] items-center justify-center">
@@ -29,6 +30,9 @@ export default async function SignUpPage({
 						</p>
 					)}
 					<form action={signUp} className="flex flex-col gap-4">
+						{inviteToken && (
+							<input type="hidden" name="invite" value={inviteToken} />
+						)}
 						<Input
 							name="email"
 							type="email"

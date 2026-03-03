@@ -13,6 +13,8 @@ export default async function InterviewsPage() {
 		status: i.status,
 		candidate_name: i.applications?.candidates?.full_name ?? "Unknown",
 		job_title: i.applications?.jobs?.title ?? "Unknown",
+		interviewer_name: i.interviewer_name ?? null,
+		notes: i.notes ?? null,
 	}));
 
 	return (

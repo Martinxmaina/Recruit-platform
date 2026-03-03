@@ -1,24 +1,34 @@
-import { Zap } from "lucide-react";
-import { Search, Mail, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { Zap, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ActivityItemProps {
-	title: string;
+	user_name: string;
 	description: string;
 	time: string;
+	link: string | null;
 	icon: React.ReactNode;
 	isLast?: boolean;
 }
 
 function ActivityItem({
-	title,
+	user_name,
 	description,
 	time,
+	link,
 	icon,
 	isLast,
 }: ActivityItemProps) {
+	const content = (
+		<>
+			<p className="text-sm">
+				<span className="font-semibold">{user_name}</span>{" "}
+				<span className="text-muted-foreground">{description}</span>
+			</p>
+			<p className="mt-1 text-[10px] text-muted-foreground/70">{time}</p>
+		</>
+	);
 	return (
 		<div className="relative flex gap-4">
 			{!isLast && (
@@ -32,21 +42,28 @@ function ActivityItem({
 				{icon}
 			</div>
 			<div className="min-w-0 pb-6">
-				<p className="text-sm font-medium">{title}</p>
-				<p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{description}</p>
-				<p className="mt-1 text-[10px] text-muted-foreground/70">{time}</p>
+				{link ? (
+					<Link href={link} className="block hover:opacity-90 line-clamp-2">
+						{content}
+					</Link>
+				) : (
+					content
+				)}
 			</div>
 		</div>
 	);
 }
 
+export type RecentActivityItem = {
+	id: string;
+	user_name: string;
+	description: string;
+	time: string;
+	link: string | null;
+};
+
 interface RecentActivityProps {
-	activity: {
-		id: string;
-		title: string;
-		description: string;
-		time: string;
-	}[];
+	activity: RecentActivityItem[];
 }
 
 export function RecentActivity({ activity }: RecentActivityProps) {
@@ -63,7 +80,10 @@ export function RecentActivity({ activity }: RecentActivityProps) {
 					activity.map((item, index) => (
 						<ActivityItem
 							key={item.id}
-							{...item}
+							user_name={item.user_name}
+							description={item.description}
+							time={item.time}
+							link={item.link}
 							icon={<RefreshCw className="size-3.5 text-muted-foreground" />}
 							isLast={index === activity.length - 1}
 						/>

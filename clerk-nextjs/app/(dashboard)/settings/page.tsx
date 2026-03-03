@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { OrgProfile } from "@/components/settings/org-profile";
+import { DisplayNameForm } from "@/components/settings/display-name-form";
 import { MembersList } from "@/components/settings/members-list";
 import { InviteForm } from "@/components/settings/invite-form";
 import { GoogleCalendarSettings } from "./google-calendar";
@@ -17,20 +18,33 @@ export default async function SettingsPage() {
 	const members = await getMembers();
 
 	let gcalConnected = false;
+	let displayName: string | null = null;
 	try {
 		const supabase = await createAdminClient(user.id);
 		const { data: member } = await supabase
 			.from("org_members")
-			.select("google_calendar_token")
+			.select("google_calendar_token, display_name")
 			.eq("organization_id", org.id)
 			.eq("user_id", user.id)
 			.single();
 		gcalConnected = !!member?.google_calendar_token;
+		displayName = member?.display_name ?? null;
 	} catch {
 		// Ignore
 	}
 
-	const gcalAuthUrl = getAuthUrl(org.id);
+	let gcalAuthUrl: string | null = null;
+	try {
+		if (
+			process.env.GOOGLE_CLIENT_ID &&
+			process.env.GOOGLE_CLIENT_SECRET &&
+			process.env.GOOGLE_REDIRECT_URI
+		) {
+			gcalAuthUrl = getAuthUrl(org.id);
+		}
+	} catch {
+		// Ignore
+	}
 
 	return (
 		<div className="mx-auto max-w-4xl space-y-8">
@@ -50,15 +64,19 @@ export default async function SettingsPage() {
 
 			<Separator />
 
+			<DisplayNameForm initialDisplayName={displayName} />
+
+			<Separator />
+
 			<MembersList members={members} />
 
 			<Separator />
 
-			<InviteForm orgId={org.id} />
+			<InviteForm orgId={org.id} appUrl={process.env.NEXT_PUBLIC_APP_URL ?? ""} />
 
 			<Separator />
 
-			<GoogleCalendarSettings isConnected={gcalConnected} authUrl={gcalAuthUrl} />
+			<GoogleCalendarSettings isConnected={gcalConnected} authUrl={gcalAuthUrl ?? null} />
 		</div>
 	);
 }

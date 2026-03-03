@@ -8,12 +8,14 @@ export default async function CandidatesPage({
 	searchParams: Promise<{
 		search?: string;
 		source?: string;
+		sort?: string;
 	}>;
 }) {
 	const params = await searchParams;
 	const candidates = await getCandidates({
 		search: params.search,
 		source: params.source,
+		sort: params.sort,
 	});
 
 	return (

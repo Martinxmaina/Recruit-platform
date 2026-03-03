@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +19,8 @@ interface CalendarInterview {
 	status: string;
 	candidate_name: string;
 	job_title: string;
+	interviewer_name: string | null;
+	notes: string | null;
 }
 
 interface InterviewsCalendarProps {
@@ -43,6 +51,7 @@ export function InterviewsCalendar({ interviews }: InterviewsCalendarProps) {
 	const now = new Date();
 	const [year, setYear] = useState(now.getFullYear());
 	const [month, setMonth] = useState(now.getMonth());
+	const [selectedInterview, setSelectedInterview] = useState<CalendarInterview | null>(null);
 
 	const daysInMonth = getDaysInMonth(year, month);
 	const firstDay = getFirstDayOfMonth(year, month);
@@ -80,6 +89,7 @@ export function InterviewsCalendar({ interviews }: InterviewsCalendarProps) {
 	const isCurrentMonth = now.getFullYear() === year && now.getMonth() === month;
 
 	return (
+		<>
 		<Card>
 			<CardHeader>
 				<div className="flex items-center justify-between">
@@ -136,16 +146,40 @@ export function InterviewsCalendar({ interviews }: InterviewsCalendarProps) {
 									{day}
 								</span>
 								<div className="mt-0.5 space-y-0.5">
-									{dayInterviews.slice(0, 2).map((iv) => (
-										<div
-											key={iv.id}
-											className="flex items-center gap-1 rounded px-1 py-0.5 bg-muted/50"
-											title={`${iv.candidate_name} - ${iv.job_title}`}
-										>
-											<span className={cn("size-1.5 rounded-full shrink-0", STATUS_COLORS[iv.status] || "bg-gray-400")} />
-											<span className="text-[9px] truncate">{iv.candidate_name}</span>
-										</div>
-									))}
+									{dayInterviews.slice(0, 2).map((iv) => {
+										const time = new Date(iv.scheduled_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+										const tooltipParts = [
+											`${iv.candidate_name} · ${iv.job_title}`,
+											time,
+											iv.interviewer_name ? `Interviewer: ${iv.interviewer_name}` : null,
+											iv.notes ? `Notes: ${iv.notes}` : null,
+										].filter(Boolean);
+										return (
+											<button
+												key={iv.id}
+												type="button"
+												className="w-full text-left rounded px-1 py-0.5 bg-muted/50 space-y-0.5 hover:bg-muted/70 transition-colors cursor-pointer"
+												title={tooltipParts.join("\n")}
+												onClick={() => setSelectedInterview(iv)}
+											>
+												<div className="flex items-center gap-1">
+													<span className={cn("size-1.5 rounded-full shrink-0", STATUS_COLORS[iv.status] || "bg-gray-400")} />
+													<span className="text-[8px] text-muted-foreground shrink-0">{time}</span>
+													<span className="text-[9px] truncate">{iv.candidate_name}</span>
+												</div>
+												{iv.interviewer_name && (
+													<div className="text-[8px] text-muted-foreground truncate pl-2.5" title={iv.interviewer_name}>
+														{iv.interviewer_name}
+													</div>
+												)}
+												{iv.notes && (
+													<div className="text-[8px] text-muted-foreground truncate pl-2.5 max-w-full" title={iv.notes}>
+														{iv.notes}
+													</div>
+												)}
+											</button>
+										);
+									})}
 									{dayInterviews.length > 2 && (
 										<span className="text-[9px] text-muted-foreground pl-1">
 											+{dayInterviews.length - 2} more
@@ -158,5 +192,65 @@ export function InterviewsCalendar({ interviews }: InterviewsCalendarProps) {
 				</div>
 			</CardContent>
 		</Card>
+
+		<Dialog open={!!selectedInterview} onOpenChange={(open) => !open && setSelectedInterview(null)}>
+			<DialogContent>
+				{selectedInterview && (
+					<>
+						<DialogHeader>
+							<DialogTitle>Interview details</DialogTitle>
+						</DialogHeader>
+						<div className="grid gap-3 text-sm">
+							<div>
+								<span className="text-muted-foreground">Candidate</span>
+								<p className="font-medium">{selectedInterview.candidate_name}</p>
+							</div>
+							<div>
+								<span className="text-muted-foreground">Job</span>
+								<p className="font-medium">{selectedInterview.job_title}</p>
+							</div>
+							<div>
+								<span className="text-muted-foreground">Date & time</span>
+								<p className="font-medium">
+									{new Date(selectedInterview.scheduled_at).toLocaleDateString(undefined, {
+										weekday: "short",
+										month: "short",
+										day: "numeric",
+										year: "numeric",
+									})}{" "}
+									at{" "}
+									{new Date(selectedInterview.scheduled_at).toLocaleTimeString([], {
+										hour: "2-digit",
+										minute: "2-digit",
+									})}
+								</p>
+							</div>
+							{selectedInterview.interviewer_name && (
+								<div>
+									<span className="text-muted-foreground">Interviewer</span>
+									<p className="font-medium">{selectedInterview.interviewer_name}</p>
+								</div>
+							)}
+							{selectedInterview.notes && (
+								<div>
+									<span className="text-muted-foreground">Notes</span>
+									<p className="font-medium whitespace-pre-wrap">{selectedInterview.notes}</p>
+								</div>
+							)}
+							<div>
+								<span className="text-muted-foreground">Status</span>
+								<p className="font-medium capitalize">{selectedInterview.status}</p>
+							</div>
+						</div>
+						<DialogFooter>
+							<Button variant="outline" onClick={() => setSelectedInterview(null)}>
+								Close
+							</Button>
+						</DialogFooter>
+					</>
+				)}
+			</DialogContent>
+		</Dialog>
+		</>
 	);
 }

@@ -186,9 +186,14 @@ export type Database = {
         Row: {
           application_id: string
           created_at: string | null
+          feedback_notes: string | null
           id: string
+          interviewer_name: string | null
+          interviewer_user_id: string | null
+          meeting_transcript: string | null
           notes: string | null
           organization_id: string
+          rating: number | null
           scheduled_at: string
           status: string
           updated_at: string | null
@@ -196,9 +201,14 @@ export type Database = {
         Insert: {
           application_id: string
           created_at?: string | null
+          feedback_notes?: string | null
           id?: string
+          interviewer_name?: string | null
+          interviewer_user_id?: string | null
+          meeting_transcript?: string | null
           notes?: string | null
           organization_id: string
+          rating?: number | null
           scheduled_at: string
           status?: string
           updated_at?: string | null
@@ -206,9 +216,14 @@ export type Database = {
         Update: {
           application_id?: string
           created_at?: string | null
+          feedback_notes?: string | null
           id?: string
+          interviewer_name?: string | null
+          interviewer_user_id?: string | null
+          meeting_transcript?: string | null
           notes?: string | null
           organization_id?: string
+          rating?: number | null
           scheduled_at?: string
           status?: string
           updated_at?: string | null
@@ -564,6 +579,7 @@ export type Database = {
       org_members: {
         Row: {
           created_at: string | null
+          display_name: string | null
           google_calendar_token: Json | null
           id: string
           organization_id: string
@@ -573,6 +589,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          display_name?: string | null
           google_calendar_token?: Json | null
           id?: string
           organization_id: string
@@ -582,6 +599,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          display_name?: string | null
           google_calendar_token?: Json | null
           id?: string
           organization_id?: string
@@ -777,7 +795,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      set_user_context: { Args: { p_user_id: string }; Returns: undefined }
+      set_user_context: { Args: { p_user_id: string; p_user_name?: string | null }; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

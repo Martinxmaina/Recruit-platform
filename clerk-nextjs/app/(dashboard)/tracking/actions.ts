@@ -8,7 +8,7 @@ export async function getTrackedCandidates() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data, error } = await supabase
 		.from("tracked_candidates")
 		.select(
@@ -37,7 +37,7 @@ export async function isCandidateTracked(candidateId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return false;
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { count } = await supabase
 		.from("tracked_candidates")
 		.select("id", { count: "exact", head: true })
@@ -51,7 +51,7 @@ export async function addToTracking(candidateId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: candidate } = await supabase
 		.from("candidates")
 		.select("id, linkedin_url")
@@ -87,7 +87,7 @@ export async function removeFromTracking(trackedId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("tracked_candidates")
 		.delete()
@@ -110,7 +110,7 @@ export async function updateTrackedCandidate(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("tracked_candidates")
 		.update({

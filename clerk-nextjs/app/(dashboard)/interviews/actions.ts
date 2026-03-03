@@ -14,6 +14,9 @@ export type Interview = {
 	notes: string | null;
 	interviewer_user_id: string | null;
 	interviewer_name: string | null;
+	rating: number | null;
+	feedback_notes: string | null;
+	meeting_transcript: string | null;
 	created_at: string | null;
 	updated_at: string | null;
 };
@@ -27,7 +30,7 @@ export async function getInterviews(filters?: {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	let applicationIds: string[] | null = null;
 
 	if (filters?.job_id || filters?.candidate_id) {
@@ -118,7 +121,7 @@ export async function getInterview(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: interview, error } = await supabase
 		.from("interviews")
 		.select(
@@ -163,7 +166,7 @@ export async function createInterview(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: application } = await supabase
 		.from("applications")
 		.select("id, job_id, candidate_id")
@@ -209,12 +212,15 @@ export async function updateInterview(
 		notes?: string | null;
 		interviewer_user_id?: string | null;
 		interviewer_name?: string | null;
+		rating?: number | null;
+		feedback_notes?: string | null;
+		meeting_transcript?: string | null;
 	}
 ) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const updateData: Record<string, unknown> = {
 		updated_at: new Date().toISOString(),
 	};
@@ -226,6 +232,10 @@ export async function updateInterview(
 		updateData.interviewer_user_id = data.interviewer_user_id;
 	if (data.interviewer_name !== undefined)
 		updateData.interviewer_name = data.interviewer_name;
+	if (data.rating !== undefined) updateData.rating = data.rating;
+	if (data.feedback_notes !== undefined) updateData.feedback_notes = data.feedback_notes;
+	if (data.meeting_transcript !== undefined)
+		updateData.meeting_transcript = data.meeting_transcript;
 
 	const { data: interview, error } = await supabase
 		.from("interviews")
@@ -257,7 +267,7 @@ export async function deleteInterview(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("interviews")
 		.delete()
@@ -280,7 +290,7 @@ export async function getOrgMembers() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: members, error } = await supabase
 		.from("org_members")
 		.select("user_id, role")

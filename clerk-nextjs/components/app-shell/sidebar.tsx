@@ -14,6 +14,7 @@ import {
 	Globe,
 	GitBranch,
 	BookmarkCheck,
+	Activity,
 	LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,6 +31,7 @@ const allNavItems = [
 	{ href: "/pipelines", label: "Pipelines", icon: GitBranch, roles: ["admin", "recruiter"] },
 	{ href: "/tracking", label: "Tracking", icon: BookmarkCheck, roles: ["admin", "recruiter"] },
 	{ href: "/interviews", label: "Interviews", icon: CalendarDays, roles: ["admin", "recruiter"] },
+	{ href: "/activity", label: "Activity", icon: Activity, roles: ["admin", "recruiter"] },
 	{ href: "/portal", label: "Client Portal", icon: Globe, roles: ["client"] },
 	{ href: "/automation", label: "Automation", icon: Zap, roles: ["admin"] },
 	{ href: "/settings", label: "Settings", icon: Settings, roles: ["admin", "recruiter"] },

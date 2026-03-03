@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -17,38 +18,57 @@ interface CandidatesFilterBarProps {
 	onFiltersChange: (filters: {
 		search?: string;
 		source?: string;
+		sort?: string;
 	}) => void;
 }
 
 export function CandidatesFilterBar({ onFiltersChange }: CandidatesFilterBarProps) {
-	const [search, setSearch] = useState("");
-	const [source, setSource] = useState<string>("all");
+	const searchParams = useSearchParams();
+	const [search, setSearch] = useState(() => searchParams.get("search") ?? "");
+	const [source, setSource] = useState<string>(
+		() => searchParams.get("source") ?? "all"
+	);
+	const [sort, setSort] = useState<string>(
+		() => searchParams.get("sort") ?? "created_at_desc"
+	);
+	const isMounted = useRef(false);
 
 	useEffect(() => {
+		setSearch(searchParams.get("search") ?? "");
+		setSource(searchParams.get("source") ?? "all");
+		setSort(searchParams.get("sort") ?? "created_at_desc");
+	}, [searchParams]);
+
+	useEffect(() => {
+		if (!isMounted.current) {
+			isMounted.current = true;
+			return;
+		}
 		const timeout = setTimeout(() => {
 			onFiltersChange({
 				search: search || undefined,
 				source: source !== "all" ? source : undefined,
+				sort: sort !== "created_at_desc" ? sort : undefined,
 			});
 		}, search ? 300 : 0);
 
 		return () => clearTimeout(timeout);
-	}, [search, source, onFiltersChange]);
+	}, [search, source, sort, onFiltersChange]);
 
 	const clearFilters = () => {
 		setSearch("");
 		setSource("all");
+		setSort("created_at_desc");
 		onFiltersChange({});
 	};
 
-	const hasActiveFilters = search || source !== "all";
-
-	const [filtersOpen, setFiltersOpen] = useState(false);
+	const hasActiveFilters = search || source !== "all" || sort !== "created_at_desc";
+	const [filtersOpen, setFiltersOpen] = useState(true);
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center gap-3">
-				<div className="relative flex-1">
+			<div className="flex flex-wrap items-center gap-3">
+				<div className="relative min-w-[200px] flex-1">
 					<Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						placeholder="Search candidates..."
@@ -60,15 +80,16 @@ export function CandidatesFilterBar({ onFiltersChange }: CandidatesFilterBarProp
 				<Button
 					variant="outline"
 					size="sm"
-					className="gap-1.5 md:hidden"
+					className="gap-1.5 shrink-0"
 					onClick={() => setFiltersOpen(!filtersOpen)}
+					aria-expanded={filtersOpen}
 				>
 					<Filter className="size-3.5" />
 					Filters
 				</Button>
 			</div>
 
-			<div className={`flex-wrap items-center gap-3 ${filtersOpen ? "flex" : "hidden md:flex"}`}>
+			<div className={`flex flex-wrap items-center gap-3 ${filtersOpen ? "flex" : "hidden"}`}>
 				<Select value={source} onValueChange={setSource}>
 					<SelectTrigger className="w-[150px]">
 						<SelectValue placeholder="Source" />
@@ -80,6 +101,15 @@ export function CandidatesFilterBar({ onFiltersChange }: CandidatesFilterBarProp
 						<SelectItem value="referral">Referral</SelectItem>
 						<SelectItem value="manual">Manual</SelectItem>
 						<SelectItem value="other">Other</SelectItem>
+					</SelectContent>
+				</Select>
+				<Select value={sort} onValueChange={setSort}>
+					<SelectTrigger className="w-[160px]">
+						<SelectValue placeholder="Sort" />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value="created_at_desc">Newest first</SelectItem>
+						<SelectItem value="created_at_asc">Oldest first</SelectItem>
 					</SelectContent>
 				</Select>
 
@@ -99,6 +129,15 @@ export function CandidatesFilterBar({ onFiltersChange }: CandidatesFilterBarProp
 							<X
 								className="size-3 cursor-pointer"
 								onClick={() => setSource("all")}
+							/>
+						</Badge>
+					)}
+					{sort !== "created_at_desc" && (
+						<Badge variant="secondary" className="gap-1">
+							Sort: {sort === "created_at_asc" ? "Oldest first" : sort}
+							<X
+								className="size-3 cursor-pointer"
+								onClick={() => setSort("created_at_desc")}
 							/>
 						</Badge>
 					)}

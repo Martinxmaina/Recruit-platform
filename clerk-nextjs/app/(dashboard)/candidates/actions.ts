@@ -24,11 +24,12 @@ export type Candidate = {
 export async function getCandidates(filters?: {
 	search?: string;
 	source?: string;
+	sort?: string;
 }) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	let query = supabase
 		.from("candidates")
 		.select(
@@ -60,9 +61,10 @@ export async function getCandidates(filters?: {
 		query = query.eq("source", filters.source);
 	}
 
-	const { data: candidates, error } = await query.order("created_at", {
-		ascending: false,
-	});
+	const ascending = filters?.sort === "created_at_asc";
+	query = query.order("created_at", { ascending });
+
+	const { data: candidates, error } = await query;
 
 	if (error) {
 		console.error("Error fetching candidates:", error);
@@ -76,7 +78,7 @@ export async function getCandidate(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: candidate, error } = await supabase
 		.from("candidates")
 		.select("*")
@@ -106,7 +108,7 @@ export async function createCandidate(data: {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: candidate, error } = await supabase
 		.from("candidates")
 		.insert({
@@ -150,7 +152,7 @@ export async function updateCandidate(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const updateData: Record<string, unknown> = {
 		updated_at: new Date().toISOString(),
 	};
@@ -187,7 +189,7 @@ export async function deleteCandidate(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("candidates")
 		.delete()
@@ -207,7 +209,7 @@ export async function getCandidateApplications(candidateId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: applications, error } = await supabase
 		.from("applications")
 		.select(

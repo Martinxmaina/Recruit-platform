@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
 	try {
 		const tokens = await exchangeCode(code);
 
-		const supabase = await createAdminClient(ctx.userId);
+		const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 		await supabase
 			.from("org_members")
 			.update({ google_calendar_token: tokens as any })

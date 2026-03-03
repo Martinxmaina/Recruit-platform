@@ -2,7 +2,10 @@
 
 import { getCurrentUserOrg } from "@/lib/api/helpers";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { Database } from "@/lib/supabase/types";
 import { revalidatePath } from "next/cache";
+
+type NotificationInsert = Database["public"]["Tables"]["notifications"]["Insert"];
 
 export type Notification = {
 	id: string;
@@ -21,7 +24,7 @@ export async function getNotifications(limit = 20) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("notifications")
 		.select("*")
@@ -37,7 +40,7 @@ export async function getUnreadCount() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return 0;
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { count } = await supabase
 		.from("notifications")
 		.select("*", { count: "exact", head: true })
@@ -52,7 +55,7 @@ export async function markAsRead(notificationId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("notifications")
 		.update({ read_at: new Date().toISOString() })
@@ -69,7 +72,7 @@ export async function markAllAsRead() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("notifications")
 		.update({ read_at: new Date().toISOString() })
@@ -94,15 +97,15 @@ export async function createNotification(data: {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
-	const insertData: Record<string, unknown> = {
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
+	const insertData: NotificationInsert = {
 		organization_id: ctx.orgId,
 		user_id: data.userId,
 		type: data.type,
 		title: data.title,
 		message: data.message ?? null,
 		link: data.link ?? null,
-		metadata: data.metadata ?? {},
+		metadata: (data.metadata ?? {}) as NotificationInsert["metadata"],
 	};
 	const { error } = await supabase.from("notifications").insert(insertData);
 

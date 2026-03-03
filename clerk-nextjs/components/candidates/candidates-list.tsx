@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { CandidatesFilterBar } from "./candidates-filter-bar";
 import { CandidatesTable } from "./candidates-table";
 import { CandidatesCardGrid } from "./candidates-card-grid";
@@ -26,18 +26,18 @@ interface CandidatesListProps {
 
 export function CandidatesList({ initialCandidates }: CandidatesListProps) {
 	const router = useRouter();
-	const searchParams = useSearchParams();
 	const [viewMode, setViewMode] = useState<"table" | "card">("table");
 
-	const handleFiltersChange = (filters: {
-		search?: string;
-		source?: string;
-	}) => {
-		const params = new URLSearchParams();
-		if (filters.search) params.set("search", filters.search);
-		if (filters.source) params.set("source", filters.source);
-		router.push(`/candidates?${params.toString()}`);
-	};
+	const handleFiltersChange = useCallback(
+		(filters: { search?: string; source?: string; sort?: string }) => {
+			const params = new URLSearchParams();
+			if (filters.search) params.set("search", filters.search);
+			if (filters.source) params.set("source", filters.source);
+			if (filters.sort) params.set("sort", filters.sort);
+			router.push(`/candidates?${params.toString()}`);
+		},
+		[router]
+	);
 
 	return (
 		<div className="space-y-6">

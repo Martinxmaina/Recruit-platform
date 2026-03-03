@@ -1,18 +1,21 @@
 import { getCurrentUser, getCurrentOrg } from "@/lib/auth/session";
+import { getMemberDisplayName } from "@/lib/supabase/admin";
 import { NextResponse } from "next/server";
 
 /**
- * Returns current Supabase user id and DB organization id for API routes and server actions.
- * Use this instead of auth() + getOrgId when you need userId and orgId.
+ * Returns current user id, org id, and display name for API routes and server actions.
+ * displayName is used for activity log (who moved the candidate, etc.).
  */
 export async function getCurrentUserOrg(): Promise<{
 	userId: string;
 	orgId: string;
+	displayName?: string | null;
 } | null> {
 	const user = await getCurrentUser();
 	const org = await getCurrentOrg();
 	if (!user || !org) return null;
-	return { userId: user.id, orgId: org.id };
+	const displayName = await getMemberDisplayName(user.id, org.id);
+	return { userId: user.id, orgId: org.id, displayName };
 }
 
 export function jsonResponse(

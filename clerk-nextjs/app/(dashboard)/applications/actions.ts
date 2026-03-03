@@ -28,19 +28,13 @@ export async function getApplications(filters?: {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	let query = supabase
 		.from("applications")
 		.select(
 			`
 			*,
-			candidates!inner(
-				id,
-				full_name,
-				email,
-				current_title,
-				current_company
-			),
+			candidates!inner(*),
 			jobs!inner(
 				id,
 				title,
@@ -91,7 +85,7 @@ export async function getCandidateApplications(candidateId: string) {
 export async function getApplication(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return null;
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: application, error } = await supabase
 		.from("applications")
 		.select(
@@ -119,7 +113,7 @@ export async function createApplication(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: existing } = await supabase
 		.from("applications")
 		.select("id")
@@ -169,7 +163,7 @@ export async function updateApplication(
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: currentApp } = await supabase
 		.from("applications")
 		.select("stage, candidate_id")
@@ -232,7 +226,7 @@ export async function deleteApplication(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("applications")
 		.delete()

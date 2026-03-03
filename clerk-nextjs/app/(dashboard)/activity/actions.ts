@@ -27,7 +27,7 @@ export async function getCandidateActivity(candidateId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data, error } = await supabase
 		.from("activity_logs")
 		.select("*")
@@ -51,7 +51,7 @@ export async function getJobActivity(jobId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: applications } = await supabase
 		.from("applications")
 		.select("id, candidate_id")
@@ -86,7 +86,7 @@ export async function getUserActivity(dateRange?: { start?: string; end?: string
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	let query = supabase
 		.from("activity_logs")
 		.select("*")
@@ -105,6 +105,37 @@ export async function getUserActivity(dateRange?: { start?: string; end?: string
 
 	if (error) {
 		console.error("Error fetching user activity:", error);
+		return [];
+	}
+
+	return (data as ActivityLog[]) ?? [];
+}
+
+/**
+ * Get activity for the whole organization (team workflow)
+ */
+export async function getOrgActivity(dateRange?: { start?: string; end?: string }) {
+	const ctx = await getCurrentUserOrg();
+	if (!ctx) return [];
+
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
+	let query = supabase
+		.from("activity_logs")
+		.select("*")
+		.eq("organization_id", ctx.orgId)
+		.order("created_at", { ascending: false });
+
+	if (dateRange?.start) {
+		query = query.gte("created_at", dateRange.start);
+	}
+	if (dateRange?.end) {
+		query = query.lte("created_at", dateRange.end);
+	}
+
+	const { data, error } = await query.limit(500);
+
+	if (error) {
+		console.error("Error fetching org activity:", error);
 		return [];
 	}
 

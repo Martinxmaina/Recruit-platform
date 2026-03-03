@@ -2,7 +2,7 @@ import { getCandidateInterviews } from "@/app/(dashboard)/interviews/actions";
 import { getCandidateApplications } from "@/app/(dashboard)/applications/actions";
 import { InterviewsList } from "@/components/interviews/interviews-list";
 import { ScheduleInterviewDialog } from "@/components/interviews/schedule-interview-dialog";
-import { CandidateInterviewFeedback } from "./candidate-interview-feedback";
+import { InterviewFeedbackCard } from "@/components/interviews/interview-feedback-card";
 
 interface CandidateInterviewsTabProps {
 	candidateId: string;
@@ -18,7 +18,6 @@ export async function CandidateInterviewsTab({
 
 	return (
 		<div className="space-y-6">
-			<CandidateInterviewFeedback />
 			<div className="space-y-4">
 				<div className="flex items-center justify-between">
 					<p className="text-sm text-muted-foreground">
@@ -31,6 +30,19 @@ export async function CandidateInterviewsTab({
 				</div>
 				<InterviewsList interviews={interviews as any} />
 			</div>
+			{interviews.length > 0 && (
+				<div className="space-y-4">
+					<h4 className="text-sm font-medium">Interview feedback</h4>
+					<div className="space-y-3">
+						{interviews.map((interview) => (
+							<InterviewFeedbackCard
+								key={interview.id}
+								interview={interview as any}
+							/>
+						))}
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }

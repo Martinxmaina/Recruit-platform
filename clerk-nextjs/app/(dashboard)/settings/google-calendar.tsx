@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 interface GoogleCalendarSettingsProps {
 	isConnected: boolean;
-	authUrl: string;
+	authUrl: string | null;
 }
 
 export function GoogleCalendarSettings({ isConnected, authUrl }: GoogleCalendarSettingsProps) {
@@ -33,13 +33,17 @@ export function GoogleCalendarSettings({ isConnected, authUrl }: GoogleCalendarS
 							<Check className="size-3" />
 							Connected
 						</Badge>
-					) : (
+					) : authUrl ? (
 						<Button asChild size="sm" className="gap-1.5">
 							<a href={authUrl}>
 								<ExternalLink className="size-3.5" />
 								Connect
 							</a>
 						</Button>
+					) : (
+						<span className="text-xs text-muted-foreground">
+							Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI in .env
+						</span>
 					)}
 				</div>
 			</CardContent>

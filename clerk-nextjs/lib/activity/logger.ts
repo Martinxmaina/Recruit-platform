@@ -32,7 +32,7 @@ export async function createActivityLog(data: ActivityLogData) {
 	const userName =
 		(user?.user_metadata?.full_name as string) ?? user?.email ?? ctx.userId;
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase.from("activity_logs").insert({
 		organization_id: ctx.orgId,
 		entity_type: data.entityType,

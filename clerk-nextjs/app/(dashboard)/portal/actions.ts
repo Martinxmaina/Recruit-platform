@@ -10,7 +10,7 @@ export async function getPortalJobs() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: jobs } = await supabase
 		.from("jobs")
 		.select("id, title, status, location, work_type, created_at, clients(name)")
@@ -36,7 +36,7 @@ export async function getPortalShortlist() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data } = await supabase
 		.from("applications")
 		.select(`

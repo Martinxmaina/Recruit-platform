@@ -10,7 +10,7 @@ export async function getClients() {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: clients, error } = await supabase
 		.from("clients")
 		.select("*")
@@ -29,7 +29,7 @@ export async function getClient(id: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) redirect("/dashboard");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.select("*")
@@ -49,7 +49,7 @@ export async function createClient(data: ClientFormData) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.insert({
@@ -79,7 +79,7 @@ export async function updateClient(id: string, data: ClientFormData) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: client, error } = await supabase
 		.from("clients")
 		.update({
@@ -112,7 +112,7 @@ export async function getClientJobs(clientId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: jobs, error } = await supabase
 		.from("jobs")
 		.select("*")
@@ -132,7 +132,7 @@ export async function getClientCandidates(clientId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: jobs } = await supabase
 		.from("jobs")
 		.select("id")
@@ -173,7 +173,7 @@ export async function getClientActivity(clientId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data: notifications, error } = await supabase
 		.from("notifications")
 		.select("*")

@@ -21,7 +21,7 @@ export async function getNotes(entityType: string, entityId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return [];
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data, error } = await supabase
 		.from("notes")
 		.select("*")
@@ -50,7 +50,7 @@ export async function createNote(
 	const authorName =
 		(user?.user_metadata?.full_name as string) ?? (user?.email ?? "Unknown");
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { data, error } = await supabase
 		.from("notes")
 		.insert({
@@ -79,7 +79,7 @@ export async function deleteNote(noteId: string) {
 	const ctx = await getCurrentUserOrg();
 	if (!ctx) return { error: "Unauthorized" };
 
-	const supabase = await createAdminClient(ctx.userId);
+	const supabase = await createAdminClient(ctx.userId, ctx.displayName);
 	const { error } = await supabase
 		.from("notes")
 		.delete()
